@@ -1,21 +1,29 @@
+// src/components/App/index.js
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import CytoscapeComponent from './CytoscapeComponent.js'
+import Footer from './Footer.js'
+import './css/style.css';
+
 
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
+	constructor(props){
+		super(props)
+		this.cy = null
+	}
+
+	render() {
+		const app = this;
+
+		return (
+			<div className='App'>
+				<CytoscapeComponent 
+					ref={function(cy) { app.cy = cy }}
+				/>
+				<Footer />
+			</div>
+		);
+	}
 }
 
 export default App;
+

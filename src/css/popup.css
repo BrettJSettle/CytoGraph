@@ -1,0 +1,48 @@
+LabelEditDialog {
+
+}
+/* Popup container */
+.popup {
+		margin-left: 5px;
+}
+
+/* The actual popup (appears on top) */
+.popup .popup-content{
+    /*visibility: hidden;*/
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 10px;
+    position: relative;
+    z-index: 1;
+		width: 200px;
+
+}
+
+.popup input {
+		width: 100%;
+}
+
+/* Popup arrow */
+.popup .popup-content::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    margin-left: -5px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent transparent #555 transparent;
+		left: 5%;
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+    from {opacity: 0;} 
+    to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity:1 ;}
+}

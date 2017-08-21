@@ -1,0 +1,74 @@
+.AnalysisTab {
+	position: absolute;
+	bottom: 20px;
+	right: 0;
+	left: 0;
+	z-index: 1;
+}
+
+.AnalysisTab .modal {
+	z-index: 16;
+}
+
+.AnalysisButtons {
+}
+
+button.close {
+  position: fixed;
+  top: 14px;
+	right: 17px;
+}
+
+.AnalysisButtons button {
+	background: none;
+	border: none;
+	opacity: .7;
+}
+
+.AnalysisButtons button:hover {
+	opacity: 1;
+}
+
+.script-container {
+	position:fixed;
+	left:60px;
+	right: 40px;
+	bottom: 20px;
+	top: 70%;
+	display: block;
+	padding: 5px;
+	background: skyblue
+}
+
+.AnalysisTab textarea {
+	resize: none;
+	font-family: monospace;
+	width: 100%;
+	height: 100%;
+}
+
+.AnalysisTab .panel-body {
+	height: 200px;
+}
+
+#collapse1 div{
+	padding: 0;
+}
+
+.outputArea {
+	height: 20%;
+	background: lightgray;
+}
+
+.AnalysisButtons a {
+	color: #333;
+}
+
+.modal-backdrop.in {
+	z-index:15;
+}
+
+.AnalysisButtons .panel-group .panel {
+	width: fit-content;
+}
+
