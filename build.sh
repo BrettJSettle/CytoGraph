@@ -1,5 +1,5 @@
 git checkout build
-rm -rf *
+rm -rf `ls --ignore=node_modules`
 git checkout master
 npm install
 git checkout build
