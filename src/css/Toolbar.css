@@ -1,0 +1,7 @@
+.Toolbar {
+	background: transparent;
+	position: absolute;
+	left: 0;
+	top: 10%;
+	width: 50px;
+}

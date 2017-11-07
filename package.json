@@ -4,14 +4,14 @@
   "private": true,
   "dependencies": {
     "bootstrap": "^3.3.7",
-    "cytoscape": "^3.2.1",
-    "cytoscape-edgehandles": "^2.13.3",
-    "cytoscape-undo-redo": "^1.2.13",
+    "immutable": "^3.8.2",
     "jquery": "^3.2.1",
+    "radium": "^0.19.4",
     "react": "^15.6.1",
     "react-ace": "^5.1.2",
-    "react-bootstrap": "^0.31.2",
+    "react-bootstrap": "^0.31.3",
     "react-color": "^2.13.5",
+    "react-dock": "^0.2.4",
     "react-dom": "^15.6.1",
     "react-fontawesome": "^1.6.1",
     "react-scripts": "1.0.11"

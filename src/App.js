@@ -1,25 +1,26 @@
-// src/components/App/index.js
 import React, { Component } from 'react';
-import CytoscapeComponent from './CytoscapeComponent.js'
-import Footer from './Footer.js'
-import './css/style.css';
-
+import Toolbar from './Toolbar.js'
+import ScriptEditor from './ScriptEditor.js'
+import DockPanel from './DockPanel.js'
+import SettingsPanel from './SettingsPanel.js'
 
 class App extends Component {
-	constructor(props){
-		super(props)
-		this.cy = null
-	}
-
 	render() {
-		const app = this;
-
 		return (
 			<div className='App'>
-				<CytoscapeComponent 
-					ref={function(cy) { app.cy = cy }}
-				/>
-				<Footer />
+				<Toolbar />
+				<DockPanel
+					className="ScriptDock"
+					glyph='terminal'
+					position='bottom'>
+					<ScriptEditor />
+				</DockPanel>
+				<DockPanel
+					className="SettingsDock"
+					glyph='paint-brush'
+					position="right">
+					<SettingsPanel />
+				</DockPanel>
 			</div>
 		);
 	}

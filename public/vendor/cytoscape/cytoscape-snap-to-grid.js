@@ -1,5 +1,4 @@
-var jQuery =require('jquery')
-;(function($){ 
+;(function($){ 'use strict';
 
   // registers the extension on a cytoscape lib ref
   var register = function( cytoscape ){
@@ -65,9 +64,9 @@ var jQuery =require('jquery')
           var options = data.options;
   
           if( value === undefined ) {
-              if( typeof name === typeof {} ) {
+              if( typeof name == typeof {} ) {
               var newOpts = name;
-              options = $.extend( true, {}, {}, newOpts );
+              options = $.extend( true, {}, defaults, newOpts );
               data.options = options;
             } else {
               return options[ name ];
@@ -139,12 +138,11 @@ var jQuery =require('jquery')
             
             ctx.strokeStyle = options().strokeStyle;
             ctx.lineWidth = options().lineWidth;
-            var i = 0;
-
+            
             if(options().zoomDash) {
               var zoomedDash = options().lineDash.slice();
               
-              for(i = 0; i < zoomedDash.length; i++) {
+              for(var i = 0; i < zoomedDash.length; i++) {
                 zoomedDash[ i ] = options().lineDash[ i ]*zoom;
               }
               ctx.setLineDash( zoomedDash );
@@ -158,7 +156,7 @@ var jQuery =require('jquery')
               ctx.lineDashOffset = 0;
             }
             
-            for(i = initialValueX; i < canvasWidth; i += increment) {
+            for(var i = initialValueX; i < canvasWidth; i += increment) {
               ctx.beginPath();
                     ctx.moveTo( i, 0 );
                     ctx.lineTo( i, canvasHeight );
@@ -171,7 +169,7 @@ var jQuery =require('jquery')
               ctx.lineDashOffset = 0;
             }
             
-            for(i = initialValueY; i < canvasHeight; i += increment) {
+            for(var i = initialValueY; i < canvasHeight; i += increment) {
               ctx.beginPath();
                     ctx.moveTo( 0, i );
                     ctx.lineTo( canvasWidth, i );
@@ -187,9 +185,7 @@ var jQuery =require('jquery')
           };
           
           var snapNode = function(node) {
-						if (node === undefined)
-							return
-						var pos = node.position();
+            var pos = node.position();
             
             var cellX = Math.floor(pos.x/options().gridSpacing);
             var cellY = Math.floor(pos.y/options().gridSpacing);
@@ -208,13 +204,13 @@ var jQuery =require('jquery')
           
           var nodeFreed = function(ev) {
             if(options().snapToGrid) {
-              snapNode(ev.cyTarget);
+              snapNode(ev.target);
             }
           };
           
           var nodeAdded = function(ev) {
             if(options().snapToGrid) {
-              snapNode(ev.cyTarget);
+              snapNode(ev.target);
             }
           };
           
@@ -263,7 +259,7 @@ var jQuery =require('jquery')
       
       if( functions[ fn ] ) {
         return functions[ fn ].apply( container, Array.prototype.slice.call( arguments, 1 ) );
-      } else if( typeof fn === 'object' || !fn ) {
+      } else if( typeof fn == 'object' || !fn ) {
         return functions.init.apply( container, arguments );
       } else {
         console.error( 'No such function `' + fn + '` for snapToGrid' );
@@ -278,6 +274,14 @@ var jQuery =require('jquery')
     module.exports = register;
   }
 
+  if( typeof define !== 'undefined' && define.amd ){ // expose as an amd/requirejs module
+    define('cytoscape-snap-to-grid', function(){
+      return register;
+    });
+  }
 
+  if( typeof cytoscape !== 'undefined' ){ // expose to global cytoscape (i.e. window.cytoscape)
+    register( cytoscape );
+  }
 
 })( typeof jQuery !== 'undefined' ? jQuery : null );

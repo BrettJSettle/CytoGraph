@@ -1,0 +1,11 @@
+.DockPanel {
+  font-size: 16px;
+  color: #999;
+  height: 100%;
+	width: 100%;
+}
+
+.Dock-content{
+	height:100%;
+}
+

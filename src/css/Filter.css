@@ -1,0 +1,28 @@
+.Filter {
+	position: absolute;
+	top:0;
+	right: 0;
+	padding: 0px;
+	font-size: 1.5em;
+	display: flex;
+	margin:8px;
+	align-items: center;
+	border-radius: 20px;
+}
+
+.Filter #searchBar {
+	line-height: 15px;
+	font-size: 12px;
+	height: 20px;
+	width: 200px;
+	margin-left: 10px;
+}
+
+.Filter #searchBar:focus {
+	outline: none;
+	border-bottom: 2px solid blue;
+}
+
+.Filter > #searchBar {
+	box-shadow: none;
+}

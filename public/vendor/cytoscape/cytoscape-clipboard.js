@@ -1,5 +1,8 @@
+;(function () {
+    'use strict';
 
-var register = function (cytoscape, $) {
+    // registers the extension on a cytoscape lib ref
+    var register = function (cytoscape, $) {
 
         if (!cytoscape || !$) {
             return;
@@ -143,5 +146,18 @@ var register = function (cytoscape, $) {
 
     };
 
+    if (typeof module !== 'undefined' && module.exports) { // expose as a commonjs module
+        module.exports = register;
+    }
 
-module.exports = register;
+    if (typeof define !== 'undefined' && define.amd) { // expose as an amd/requirejs module
+        define('cytoscape-clipboard', function () {
+            return register;
+        });
+    }
+
+    if (typeof cytoscape !== 'undefined' && typeof jQuery !== 'undefined') { // expose to global cytoscape (i.e. window.cytoscape)
+        register(cytoscape, jQuery);
+    }
+
+})();
