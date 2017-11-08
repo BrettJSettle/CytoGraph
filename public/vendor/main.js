@@ -40,9 +40,10 @@ window.defaults = {
 		'arrow-scale': 1,
 	},
 	edgeData: {
-		'directed': 'directed',
+		'type': 'directed',
 	},
 }
+
 
 window.addEventListener("load", function() {
 	var cy = window.cy = cytoscape({
@@ -76,8 +77,8 @@ window.addEventListener("load", function() {
 			selector: 'edge',
 			css: {
 				'curve-style': 'bezier',
-				'target-arrow-shape': function(node){ return node.data('directional') === 'undirected' ? 'none': 'triangle' },
-				'source-arrow-shape': function(node){ return node.data('directional') === 'bidirectional' ? 'triangle': 'none' }
+				'target-arrow-shape': function(node){ return node.data('type') === 'undirected' ? 'none': 'triangle' },
+				'source-arrow-shape': function(node){ return node.data('type') === 'bidirectional' ? 'triangle': 'none' }
 			}
 		},
 		// some style for the ext

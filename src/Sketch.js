@@ -16,7 +16,11 @@ function parseColor(hex){
 	return {r: 0, g: 0, b: 0}
 }
 
-function toHex(a){
+function toHex(c) {
+	return '#' + toHexPair(c.r) + toHexPair(c.g) + toHexPair(c.b)
+}
+
+function toHexPair(a){
 	const tens = Math.floor(a / 16)
 	const ones = a % 16
 	const nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
@@ -27,12 +31,12 @@ function toHex(a){
 class Sketch extends React.Component {
 	constructor(props){
 		super(props)
-		const color = parseColor(props.color || '#dddddd')
+
 		this.state = {
 			displayColorPicker: false,
-			color: color
 		}
 	}
+	
 
   handleClick = () => {
     this.setState({ displayColorPicker: !this.state.displayColorPicker })
@@ -48,9 +52,6 @@ class Sketch extends React.Component {
   };
 
   render() {
-
-		const color = '#' + toHex(this.state.color.r) + toHex(this.state.color.g) + toHex(this.state.color.b)
-
 		const styles = reactCSS({
       'default': {
         color: {
@@ -64,7 +65,7 @@ class Sketch extends React.Component {
         },
         swatch: {
           padding: '5px',
-          background: color,
+          background: this.props.color,
           borderRadius: '1px',
           boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
           display: 'inline-block',
@@ -85,15 +86,15 @@ class Sketch extends React.Component {
       },
     });
 
-
+		const color = parseColor(this.props.color)
     return (
       <div>
         <div style={ styles.swatch } onClick={ this.handleClick }>
-			<div style={ styles.color }>{color}</div>
+			<div style={ styles.color }>{this.props.color}</div>
         </div>
         { this.state.displayColorPicker ? <div style={ styles.popover }>
           <div style={ styles.cover } onClick={ this.handleClose }/>
-          <SketchPicker color={ this.state.color } onChange={ this.handleChange } />
+          <SketchPicker color={ color } onChange={ this.handleChange } />
         </div> : null }
 
       </div>

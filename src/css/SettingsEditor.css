@@ -6,8 +6,6 @@
 	border-radius: 5px 0px 0px 5px;
 }
 
-
-
 .SettingsPanel-table {
 	width: 100%;
 	min-width: 250px;
@@ -31,10 +29,14 @@
 	padding: 0px 3px 0px 3px;
 }
 
-.SettingsPanel-table tr input{
-	background:transparent;
+.SettingsPanel-table tr input, .SettingsPanel-table tr select{
+	background:none;
 	height: 100%;
 	width:100%;
+}
+
+.Settings-Panel-table .reset {
+	width: 100%;
 }
 
 .SettingsPanel-table tr:nth-child(even) {
