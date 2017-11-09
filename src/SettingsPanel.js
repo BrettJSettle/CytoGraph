@@ -108,12 +108,12 @@ export default class SettingsPanel extends Component {
 			const elementType = main.state.tab.slice(0, 4)
 			let value = data[key]
 			let renderedValue = data[key]
-			
+
 			if (elementType === 'core'){
 
 			} else if (main.state.tab.endsWith('Data')){
 				if (elementType === 'node'){
-				
+
 				}else if (elementType === 'edge'){
 					if (key === 'type'){
 						renderedValue = main.makeSelect(key, renderedValue, EDGE_TYPES)
@@ -121,9 +121,9 @@ export default class SettingsPanel extends Component {
 				}
 			}else{
 				// Get rendered style if it exists
-				if (elements !== undefined){
-					if (elements.style() && typeof elements.numericStyle(key) === 'number'){
-						renderedValue === elements.numericStyle(key)
+				if (elements !== undefined && elements.style() !== undefined){
+					if (typeof elements.numericStyle(key) === 'number'){
+						renderedValue = elements.numericStyle(key)
 					}else{
 						renderedValue = elements.renderedStyle(key)
 					}
@@ -135,6 +135,7 @@ export default class SettingsPanel extends Component {
 					renderedValue = main.makeSelect(key, renderedValue, NODE_SHAPES)
 				}
 			}
+
 			// change component based on value type
 			if (typeof renderedValue === 'number' || /^[0-9.]$/.test(renderedValue)){
 				renderedValue = <input
@@ -167,16 +168,20 @@ export default class SettingsPanel extends Component {
 		const main = this;
 
 		const rows = data === undefined ? [] : this.getRows(data)
-		
+
+		const tabNames = {nodeStyle: 'Node Style', edgeStyle: 'Edge Style', edgeData: 'Edge Data', core: 'Core'}
+		const tabs = Object.keys(tabNames).map(function(name, k){
+			return <th key={k}><Button
+					className={"SettingsPanel-tab" + (main.state.tab === name ? ' active' : '')}
+					onClick={() => main.setState({tab: name}) }>{tabNames[name]}</Button>
+				</th>
+		})
 		return (
 			<div className='SettingsPanel'>
 				<table className='SettingsPanel-mode'>
 					<thead>
 						<tr>
-							<th><Button onClick={() => main.setState({tab: 'nodeStyle'}) }>Nodes</Button></th>
-							<th><Button onClick={() => main.setState({tab: 'edgeStyle'}) }>Edges</Button></th>
-							<th><Button onClick={() => main.setState({tab: 'edgeData'}) }>Edge Data</Button></th>
-							<th><Button onClick={() => main.setState({tab: 'core'}) }>Core</Button></th>
+							{tabs}
 						</tr>
 					</thead>
 				</table>
@@ -186,7 +191,14 @@ export default class SettingsPanel extends Component {
 							<th>Name</th>
 							<th>Input</th>
 							<th>Value</th>
-							<th style={{width: '30px'}}><FA name="repeat" flip='horizontal'/></th>
+							<th style={{width: '30px'}}>
+								<Button
+									className="reset"
+									style={{padding: '3px'}}
+									onClick={() => Object.keys(main.DEFAULTS[main.state.tab]).forEach((key) => main.handleChange(key, main.DEFAULTS[main.state.tab][key]))}>
+										<FA name="repeat" flip='horizontal'/>
+									</Button>
+							</th>
 						</tr>
 					</thead>
 					<tbody>

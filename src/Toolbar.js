@@ -45,7 +45,7 @@ export default class Toolbar extends Component {
 				<Nav className="ToolNav" bsStyle="tabs" activeKey={this.state.activeTool} onSelect={() => { }}>
           {tools}
         </Nav>
-        <ButtonGroup vertical>
+        <ButtonGroup vertical className="Toolbar-undo-redo">
           {actions}
         </ButtonGroup>
       </div>

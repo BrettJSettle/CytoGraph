@@ -16,18 +16,6 @@ function parseColor(hex){
 	return {r: 0, g: 0, b: 0}
 }
 
-function toHex(c) {
-	return '#' + toHexPair(c.r) + toHexPair(c.g) + toHexPair(c.b)
-}
-
-function toHexPair(a){
-	const tens = Math.floor(a / 16)
-	const ones = a % 16
-	const nums = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
-	return nums[tens] + nums[ones]
-}
-
-
 class Sketch extends React.Component {
 	constructor(props){
 		super(props)
@@ -36,7 +24,6 @@ class Sketch extends React.Component {
 			displayColorPicker: false,
 		}
 	}
-	
 
   handleClick = () => {
     this.setState({ displayColorPicker: !this.state.displayColorPicker })
