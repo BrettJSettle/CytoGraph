@@ -1,8 +1,9 @@
 import React, {Component} from 'react'
 //import AceEditor from 'react-ace'
-import 'brace/mode/javascript';
+import 'brace/mode/javascript'
 import 'brace/theme/monokai'
 import './css/ScriptEditor.css'
+
 import {ToggleButtonGroup, ToggleButton, Button} from 'react-bootstrap'
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 

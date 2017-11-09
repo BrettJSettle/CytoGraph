@@ -7,3 +7,11 @@ body {
 *:focus {
 	outline: none !important;
 }
+
+.btn {
+	border-radius: 0;
+}
+.btn.active {
+	background: #ccc;
+	font-weight: bold;
+}

@@ -12,3 +12,7 @@
 .DockPanel-hide:focus {
 	background: white;
 }
+
+.DockPanel-hide .fa:before {
+	font-size: 20px;
+}

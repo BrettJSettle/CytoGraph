@@ -35,6 +35,8 @@ export default class SettingsPanel extends Component {
 		window.addEventListener('load', function(){
 			window.cy.on('select', function(){
 				const eles = main.getCurrentElements()
+				if (eles === undefined)
+					return
 				let newNodeStyle = {}
 				Object.keys(main.state.nodeStyle).forEach(function(k){
 					newNodeStyle[k] = eles.nodes().style(k) || main.DEFAULTS['nodeStyle'][k]

@@ -1,8 +1,19 @@
+.SettingsPanel {
+	position:absolute;
+	top:0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.SettingsPanel-mode{
+	margin:auto;
+}
+
 .SettingsDock .DockPanel-hide {
 	right: 100%;
 	top: 20px;
 	position:absolute;
-	border-radius: 5px 0px 0px 5px;
 }
 
 .SettingsPanel-table {
@@ -13,11 +24,10 @@
 
 .SettingsPanel-table th {
 	background: aliceblue;
-	padding-left: 5px;
 	text-decoration:bold;
 }
 
-.SettingsPanel-table td div{
+.SettingsPanel-table td div:first-child{
 	width: 100%;
 }
 
@@ -25,7 +35,6 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow:ellipsis;
-	padding: 0px 3px 0px 3px;
 }
 
 .SettingsPanel-table tr input, .SettingsPanel-table tr select{
@@ -44,5 +53,6 @@
 
 .SettingsPanel-tab {
 	padding: 5px;
-
+	box-shadow:none;
+	border-radius:none;
 }
