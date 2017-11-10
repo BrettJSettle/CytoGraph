@@ -39,6 +39,8 @@ window.defaults = {
 		'line-style': 'solid',
 		'arrow-scale': 1,
 	},
+	nodeData: {
+	},
 	edgeData: {
 		'type': 'directed',
 	},

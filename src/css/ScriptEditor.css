@@ -15,6 +15,7 @@
 	display: block;
 	padding: 0px;
 	border-left: 1px solid #666;
+	position:relative;
 }
 
 .script-content {
@@ -40,8 +41,18 @@
 	height: 100%;
 	width: min-content;
 	padding-top: 10px;
+	background: white;
+	z-index: 10;
+	overflow:hidden;
 }
 
 .ScriptButtons * {
 	width: 100%;
+}
+#aceEditor {
+	position:absolute;
+	top:0;
+	bottom:0;
+	left: 0;
+	right: 0;
 }

@@ -7,7 +7,7 @@
 }
 
 .SettingsPanel-mode{
-	margin:auto;
+	width:100%;
 }
 
 .SettingsDock .DockPanel-hide {
@@ -54,5 +54,9 @@
 .SettingsPanel-tab {
 	padding: 5px;
 	box-shadow:none;
-	border-radius:none;
+	border-radius:0;
+	width:100%;
+}
+th:first-of-type .SettingsPanel-tab{
+	border-left: none;
 }

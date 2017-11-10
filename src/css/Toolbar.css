@@ -4,48 +4,17 @@
 	top: 10%;
 	width: 40px;
 }
-/*
-.Toolbar .nav-tabs>li {
-	background: #ddd;
-	width: 100%;
-	left: -5px;
-	transition: all .2s ease;
-}
-.Toolbar .nav-tabs>li:hover{
-	left: -2px;
-	transition: all .2s ease;
-}
-.Toolbar .nav-tabs>li.active{
-	border-right: blue 3px;
-	left: 0px;
-	transition: all .2s ease;
-}
-
-.Toolbar .nav-tabs>li.active>a, .Toolbar .nav-tabs>li.active>a:focus {
-	border: none;
-	box-shadow: inset -2px 0 0 #2196f3;
-	color: #2196f3;
-}
-
-.Toolbar .nav-tabs>li>a, .Toolbar .nav-tabs>li>a:focus {
-	margin-right: 0;
-	background-color: transparent;
-	border: none;
-	border-radius: 0;
-	color: #666666;
-	box-shadow: inset -1px 0 0 #ddd;
-	transition: all 0.2s;
-}
-.nav-tabs>li>a:hover, .nav-tabs>li>a:focus:hover {
-	color: #666 !important;
-}
-
-*/
 .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus:hover {
 	color: white !important;
 }
 .Toolbar .nav-tabs>li>a, .Toolbar .nav-tabs>li>a:focus {
+	background:white;
+	box-shadow: none;
 	border-radius: 0;
+}
+
+.Toolbar .nav-tabs {
+	box-shadow: 1px 1px 3px #aaa;
 }
 
 .Toolbar .nav-tabs>li{
@@ -53,12 +22,14 @@
 	color: #ddd;
 }
 
+
 .Toolbar .nav-tabs>li.active>a {
 	background: #2196f3;
 	color:white;
 }
 .Toolbar-undo-redo {
 	padding-top:30px;
+	width:100%;
 }
 
 .Toolbar-undo-redo button {
@@ -68,6 +39,6 @@
 .Toolbar-undo-redo button:focus {
 	background: white;
 	border-bottom: none;
-	z-index: auto;
+	z-index: auto !important;
 }
 

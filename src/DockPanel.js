@@ -13,7 +13,7 @@ export default class DockPanel extends Component {
 			size: 0,
 			position: props.position,
 		};
-		this.DEFAULT_SIZE = .3
+		this.DEFAULT_SIZE = .4
 	}
 
   render() {
@@ -31,7 +31,7 @@ export default class DockPanel extends Component {
           onSizeChange={this.handleSizeChange}>
         {({ position, isResizing }) =>
           <div className="Dock-content">
-						<Button className="DockPanel-hide"  onClick={() => { main.toggle()}}>
+						<Button className="DockPanel-hide"  onClick={main.toggle}>
 							<FA name={glyph}/>
 						</Button>
 						{this.props.children}
@@ -44,11 +44,12 @@ export default class DockPanel extends Component {
 
 	toggle = () => {
 		if (this.state.size === 0)
-			this.setState({size: this.DEFAULT_SIZE})
+			this.handleSizeChange(this.DEFAULT_SIZE)
 		else{
 			this.DEFAULT_SIZE = this.state.size
-			this.setState({size: 0})
+			this.handleSizeChange(0)
 		}
+
 	}
 
   handleSizeChange = size => {
@@ -56,5 +57,9 @@ export default class DockPanel extends Component {
 		if (size < .05)
 			size = 0
 		this.setState({ size: size });
+
+		if (this.props.onSizeChange){
+			setTimeout(this.props.onSizeChange, 500)
+		}
 	}
 }

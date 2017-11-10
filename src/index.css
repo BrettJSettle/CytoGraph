@@ -9,9 +9,14 @@ body {
 }
 
 .btn {
-	border-radius: 0;
+	border-radius: 0 !important;
 }
+
+.btn:hover, .btn.active:hover, .btn:focus{
+	border-color:white;
+}
+
 .btn.active {
 	background: #ccc;
-	font-weight: bold;
+	border-color: white;
 }

@@ -71,6 +71,11 @@ export default class SettingsPanel extends Component {
 			const eles = this.getCurrentElements()
 			eles.style(k, v)
 		}
+		if (k === 'line-color'){
+			this.handleChange('target-arrow-color', v)
+			this.handleChange('source-arrow-color', v)
+
+		}
 	}
 
 	getCurrentElements = () => {
@@ -115,6 +120,8 @@ export default class SettingsPanel extends Component {
 
 			} else if (main.state.tab.endsWith('Data')){
 				if (elementType === 'node'){
+					renderedValue = elements.nodes().data('label') || ''
+					value = elements.nodes().data('label') || ''
 
 				}else if (elementType === 'edge'){
 					if (key === 'type'){
@@ -124,14 +131,22 @@ export default class SettingsPanel extends Component {
 			}else{
 				// Get rendered style if it exists
 				if (elements !== undefined && elements.style() !== undefined){
-					if (typeof elements.numericStyle(key) === 'number'){
-						renderedValue = elements.numericStyle(key)
-					}else{
-						renderedValue = elements.renderedStyle(key)
+					let num = ''
+					try{
+						num = elements.numericStyle(key)
+						if (typeof num === 'number'){
+							renderedValue = num
+						}else{
+							renderedValue = elements.renderedStyle(key)
+						}
+					}catch(e){
+
 					}
 				}
 				// generate component if possible
-				if (key === 'line-style'){
+				if (key === 'target-arrow-color' || key === 'source-arrow-color'){
+					return
+				}if (key === 'line-style'){
 					renderedValue = main.makeSelect(key, renderedValue, LINE_STYLES)
 				}else if (key === 'shape'){
 					renderedValue = main.makeSelect(key, renderedValue, NODE_SHAPES)
@@ -159,19 +174,25 @@ export default class SettingsPanel extends Component {
 					  className="reset"
 						style={{padding: '3px'}}
 						onClick={() => main.handleChange(key, main.DEFAULTS[main.state.tab][key])}>
-						<FA name="repeat" flip='horizontal'/>
+							<FA name="repeat" flip='horizontal'/>
 						</Button></td>
 				</tr>)
 		});
 	}
 
 	render(){
-		const data = this.state[this.state.tab]
+		let data = this.state[this.state.tab]
 		const main = this;
-
+		if (this.state.tab === 'nodeData'){
+			data['label'] = ''
+		}
+		//const eles = this.getCurrentElements()
+		//if (eles !== undefined && eles.length > 0){
+		//	data = this.state.tab.endsWith('Style') ? eles.style() : eles.data()
+		//}
 		const rows = data === undefined ? [] : this.getRows(data)
 
-		const tabNames = {nodeStyle: 'Node Style', edgeStyle: 'Edge Style', edgeData: 'Edge Data', core: 'Core'}
+		const tabNames = {nodeData: 'Node Data', edgeData: 'Edge Data', nodeStyle: 'Node Style', edgeStyle: 'Edge Style', core: 'Core'}
 		const tabs = Object.keys(tabNames).map(function(name, k){
 			return <th key={k}><Button
 					className={"SettingsPanel-tab" + (main.state.tab === name ? ' active' : '')}

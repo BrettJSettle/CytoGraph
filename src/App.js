@@ -12,7 +12,10 @@ class App extends Component {
 				<DockPanel
 					className="ScriptDock"
 					glyph='terminal'
-					position='bottom'>
+					position='bottom'
+					onSizeChange={() => {
+						window.editor.resize();
+					}}>
 					<ScriptEditor />
 				</DockPanel>
 				<DockPanel

@@ -40,11 +40,6 @@ export default class ScriptEditor extends Component {
 		}
 	}
 
-	componentDidUpdate(){
-		if (window.editor)
-			window.editor.resize()
-	}
-
 	componentDidMount(){
 		window.addEventListener('load', function() {
 			const editor = window.editor = window.ace.edit('aceEditor')
@@ -54,6 +49,9 @@ export default class ScriptEditor extends Component {
 			sesh.setTabSize(2)
 			editor.setHighlightActiveLine(true)
 			editor.setShowPrintMargin(false)
+			window.addEventListener('resize', function(){
+				window.editor.resize()
+			})
 		});
 	}
 
@@ -73,7 +71,7 @@ export default class ScriptEditor extends Component {
 			<div className="ScriptEditor">
 				{buttons}
 				<div className="script-container">
-					<div id="aceEditor"	style={{position: 'absolute', height: '100%', zIndex: this.state.tab === 'script' ? 5 : 4, width: '100%'}}></div>
+					<div id="aceEditor"	style={{zIndex: this.state.tab === 'script' ? 5 : 4}}></div>
 					<textarea
 							style={{zIndex: this.state.tab === 'script' ? 4 : 5, position: 'absolute'}}
 							id="output"
