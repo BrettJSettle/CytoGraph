@@ -44,6 +44,9 @@ export default class ScriptEditor extends Component {
 		window.addEventListener('load', function() {
 			const editor = window.editor = window.ace.edit('aceEditor')
 			editor.setTheme('ace/theme/monokai')
+			editor.setOptions({
+				fontSize: '18px'
+			})
 			const sesh = editor.getSession()
 			sesh.setMode('ace/mode/javascript')
 			sesh.setTabSize(2)

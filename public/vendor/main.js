@@ -18,6 +18,7 @@ window.settings = {
 window.defaults = {
 	core: {
 		background: '#ffffff',
+		grid: false,
 	},
 	nodeStyle: {
 		'background-color': '#999999',

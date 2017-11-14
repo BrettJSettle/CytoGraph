@@ -20,7 +20,7 @@ export default class SettingsPanel extends Component {
 	constructor(props){
 		super(props)
 		this.state = {
-			tab: 'node',
+			tab: 'nodeStyle',
 			...Object.assign({}, window.defaults)
 		}
 		const DEFAULTS = {}
@@ -51,22 +51,20 @@ export default class SettingsPanel extends Component {
 		})
 	}
 
-	handleChange = (type, k, v) => {
-		const elementType = type.slice(0, 4)
-		const newDefaults = Object.assign({}, this.state[type])
+	handleChange = (k, v) => {
+		const elementType = this.state.tab.slice(0, 4)
+		const newDefaults = Object.assign({}, this.state[this.state.tab])
 		newDefaults[k] = v
-		this.setState({[type]: newDefaults})
-		window.defaults[type][k] = v
+		this.setState({[this.state.tab]: newDefaults})
+		window.defaults[this.state.tab][k] = v
 
 		if (elementType === 'core'){
 			if (k === 'background'){
 				const el = document.getElementById('cyto')
+				console.log(el)
 				el.style['background'] = v
-			}else if (k === 'grid'){
-				window.cy.snapToGrid(v ? 'snapOn' : 'snapOff')
-				window.cy.snapToGrid(v ? 'gridOn' : 'gridOff')
 			}
-		}else if(type.endsWith('Data')){
+		}else if(this.state.tab.endsWith('Data')){
 			const eles = this.getCurrentElements()
 			eles.data(k, v)
 		}else{
@@ -74,8 +72,8 @@ export default class SettingsPanel extends Component {
 			eles.style(k, v)
 		}
 		if (k === 'line-color'){
-			this.handleChange('edgeStyle', 'target-arrow-color', v)
-			this.handleChange('edgeStyle', 'source-arrow-color', v)
+			this.handleChange('target-arrow-color', v)
+			this.handleChange('source-arrow-color', v)
 
 		}
 	}
@@ -85,14 +83,15 @@ export default class SettingsPanel extends Component {
 			return undefined;
 		}
 
-		if (this.state.tab === 'core'){
+		const elementType = this.state.tab.slice(0, 4)
+		if (elementType === 'core'){
 			return undefined
-		}else if (this.state.tab === 'node'){
+		}else if (elementType === 'node'){
 			let nodes = window.cy.nodes(':selected')
 			if (nodes.length === 0)
 				nodes = window.cy.nodes()
 			return nodes
-		}else if (this.state.tab === 'edge'){
+		}else if (elementType === 'edge'){
 			let edges = window.cy.edges(':selected')
 			if (edges.length === 0)
 				edges = window.cy.edges()
@@ -100,36 +99,33 @@ export default class SettingsPanel extends Component {
 		}
 	}
 
-	makeSelect = (tab, key, value, options) => {
+	makeSelect = (key, value, options) => {
 		const opts = options.map(function(opt, k){
 			return <option key={k} value={opt}>{opt}</option>
 		})
-		return <select value={value} onChange={(v) => this.handleChange(tab, key, v.target.value)}>
+		return <select value={value} onChange={(v) => this.handleChange(key, v.target.value)}>
 			{opts}
 		</select>
 	}
 
-	getRows(tab){
+	getRows(data){
 		const main = this;
 		const elements = this.getCurrentElements()
-		const data = this.state[tab]
-		if (tab === 'nodeData' && !data.hasOwnProperty('label')){
-			data['label'] = ''
-		}
 		return Object.keys(data).map(function(key, k) {
+			const elementType = main.state.tab.slice(0, 4)
 			let value = data[key]
 			let renderedValue = data[key]
 
-			if (tab === 'core'){
-			
-			} else if (tab.endsWith('Data')){
-				if (tab.startsWith('node') && elements){
+			if (elementType === 'core'){
+
+			} else if (main.state.tab.endsWith('Data')){
+				if (elementType === 'node'){
 					renderedValue = elements.nodes().data('label') || ''
 					value = elements.nodes().data('label') || ''
 
-				}else if (tab.startsWith('edge')){
+				}else if (elementType === 'edge'){
 					if (key === 'type'){
-						renderedValue = main.makeSelect(tab, key, renderedValue, EDGE_TYPES)
+						renderedValue = main.makeSelect(key, renderedValue, EDGE_TYPES)
 					}
 				}
 			}else{
@@ -149,11 +145,11 @@ export default class SettingsPanel extends Component {
 				}
 				// generate component if possible
 				if (key === 'target-arrow-color' || key === 'source-arrow-color'){
-					return undefined
+					return
 				}if (key === 'line-style'){
-					renderedValue = main.makeSelect(tab, key, renderedValue, LINE_STYLES)
+					renderedValue = main.makeSelect(key, renderedValue, LINE_STYLES)
 				}else if (key === 'shape'){
-					renderedValue = main.makeSelect(tab, key, renderedValue, NODE_SHAPES)
+					renderedValue = main.makeSelect(key, renderedValue, NODE_SHAPES)
 				}
 			}
 
@@ -162,60 +158,41 @@ export default class SettingsPanel extends Component {
 				renderedValue = <input
 					type='number'
 					value={renderedValue}
-					onChange={(v) => main.handleChange(tab, key, parseFloat(v.target.value))}/>
+					onChange={(v) => main.handleChange(key, parseFloat(v.target.value))}/>
 			}else if (isColor(renderedValue)){
-				renderedValue = <Sketch color={renderedValue} onChange={(v) => main.handleChange(tab, key, v)}/>
-			}else if (typeof renderedValue === 'boolean'){
-				renderedValue = <input
-					type='checkbox'
-					checked={renderedValue}
-					onChange={(v) => main.handleChange(tab, key, v.target.checked)}/>
+				renderedValue = <Sketch color={renderedValue} onChange={(v) => main.handleChange(key, v)}/>
 			}
 
 			return (<tr key={k}>
 					<td>{key}</td>
 					<td><input
-						onChange={(v) => main.handleChange(tab, key, v.target.value)}
+						onChange={(v) => main.handleChange(key, v.target.value)}
 						type='text'
 						value={value}/></td>
 					<td>{renderedValue}</td>
 					<td><Button
 					  className="reset"
 						style={{padding: '3px'}}
-						onClick={() => main.handleChange(tab, key, main.DEFAULTS[tab][key])}>
+						onClick={() => main.handleChange(key, main.DEFAULTS[main.state.tab][key])}>
 							<FA name="repeat" flip='horizontal'/>
 						</Button></td>
 				</tr>)
 		});
 	}
 
-	getTables = () => {
-		if (this.state.tab === 'core'){
-			return (<tbody>
-				{this.getRows('core')}
-				</tbody>)
-		}else if (this.state.tab === 'node'){
-			const dataTable = this.getRows('nodeData')
-			const styleTable = this.getRows('nodeStyle')
-			return (<tbody>
-				{dataTable}
-				{styleTable}
-			</tbody>)
-		}else if (this.state.tab === 'edge'){
-			const dataTable = this.getRows('edgeData')
-			const styleTable = this.getRows('edgeStyle')
-			return (<tbody>
-				{dataTable}
-				{styleTable}
-			</tbody>)
-		}
-	}
-
 	render(){
+		let data = this.state[this.state.tab]
 		const main = this;
-		const rows = this.getTables() 
+		if (this.state.tab === 'nodeData'){
+			data['label'] = ''
+		}
+		//const eles = this.getCurrentElements()
+		//if (eles !== undefined && eles.length > 0){
+		//	data = this.state.tab.endsWith('Style') ? eles.style() : eles.data()
+		//}
+		const rows = data === undefined ? [] : this.getRows(data)
 
-		const tabNames = {node: 'Nodes', edge: 'Edge', core: 'Core'}
+		const tabNames = {nodeData: 'Node Data', edgeData: 'Edge Data', nodeStyle: 'Node Style', edgeStyle: 'Edge Style', core: 'Core'}
 		
 		const tabs = Object.keys(tabNames).map(function(name, k){
 			return <th key={k}><Button
@@ -242,21 +219,15 @@ export default class SettingsPanel extends Component {
 								<Button
 									className="reset"
 									style={{padding: '3px'}}
-									onClick={() => {
-										const keys = main.state.tab === 'core' ? ['core'] : [main.state.tab + 'Data', main.state.tab + 'Style']
-										keys.forEach(tab => {
-											Object.keys(main.DEFAULTS[tab]).forEach((key) => {
-												main.handleChange(tab, key, main.DEFAULTS[tab][key])
-											})
-										})
-									}
-									}>
+									onClick={() => Object.keys(main.DEFAULTS[main.state.tab]).forEach((key) => main.handleChange(key, main.DEFAULTS[main.state.tab][key]))}>
 										<FA name="repeat" flip='horizontal'/>
 									</Button>
 							</th>
 						</tr>
 					</thead>
-					{rows}
+					<tbody>
+						{rows}
+					</tbody>
 				</table>
 			</div>
 		)
