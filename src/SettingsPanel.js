@@ -12,6 +12,8 @@ const LINE_STYLES = ['solid', 'dashed', 'dotted']
 
 const EDGE_TYPES = ['directed', 'undirected', 'bidirectional']
 
+const LAYOUTS = ['grid', 'concentric', 'circle', 'random', 'breadthfirst', 'cose']
+
 const SETTINGS_PROPERTIES = {
 	core: {
 		grid: {
@@ -21,6 +23,20 @@ const SETTINGS_PROPERTIES = {
 		selectionType: {
 			options: ['single', 'additive'],
 			textInput: false,
+		},
+		layout: {
+			textInput: false,
+			options: LAYOUTS
+		},
+		autofocus: {
+			action: function(){
+				window.cy.fit()
+			}
+		},
+		complete: {
+			action: function(){
+				window.cy.complete()
+			}
 		}
 	},
 	edgeStyle: {
@@ -147,9 +163,11 @@ export default class SettingsPanel extends Component {
 	getRows(tab){
 		const main = this;
 		const elements = this.getCurrentElements()
-		const data = this.state[tab]
-
-
+		let data = this.state[tab]
+		
+		//TODO: add actual element data, and option to add custom rows
+		//TODO: add buttons for SETTINGS_PROPERTIES that are not "settings"
+		
 		return Object.keys(data).map(function(key, k) {
 			let value = data[key]
 			let renderedValue = data[key]
@@ -193,8 +211,11 @@ export default class SettingsPanel extends Component {
 					description = props['description']
 				if (props['options'])
 					renderedValue = main.makeSelect(tab, key, renderedValue, props['options'])
-				if (props.textInput === false){
+				if (props.textInput === false)
 					value = null;
+				if (props.action){
+					value = null
+					renderedValue = <button onClick={props.action}>{key}</button>
 				}
 			}
 
