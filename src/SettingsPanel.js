@@ -12,6 +12,40 @@ const LINE_STYLES = ['solid', 'dashed', 'dotted']
 
 const EDGE_TYPES = ['directed', 'undirected', 'bidirectional']
 
+const SETTINGS_PROPERTIES = {
+	core: {
+		grid: {
+			name: 'grid nodes',
+			textInput: false,
+		},
+		selectionType: {
+			options: ['single', 'additive'],
+			textInput: false,
+		}
+	},
+	edgeStyle: {
+		'text-rotation': {
+			description: 'Angle in radians, "none", or "autorotate"',
+		},
+		'line-style': {
+			options: LINE_STYLES,
+		},
+	},
+	edgeData: {
+		type: {
+			options: EDGE_TYPES,
+		}
+	},
+	nodeStyle: {
+		shape: {
+			options: NODE_SHAPES,
+		}
+	},
+	nodeData: {
+
+	}
+}
+
 function isColor(val){
 	return typeof(val) === 'string' && /^#[0-9A-F]{3,6}$/i.test(val)
 }
@@ -41,7 +75,6 @@ export default class SettingsPanel extends Component {
 				Object.keys(main.state.nodeStyle).forEach(function(k){
 					newNodeStyle[k] = eles.nodes().style(k) || main.DEFAULTS['nodeStyle'][k]
 				})
-				
 				let newEdgeStyle = {}
 				Object.keys(main.state.edgeStyle).forEach(function(k){
 					newEdgeStyle[k] = eles.edges().style(k) || main.DEFAULTS['edgeStyle'][k]
@@ -65,6 +98,8 @@ export default class SettingsPanel extends Component {
 			}else if (k === 'grid'){
 				window.cy.snapToGrid(v ? 'snapOn' : 'snapOff')
 				window.cy.snapToGrid(v ? 'gridOn' : 'gridOff')
+			}else if (k === 'selectionType'){
+				window.cy._private.selectionType = v
 			}
 		}else if(type.endsWith('Data')){
 			const eles = this.getCurrentElements()
@@ -113,31 +148,33 @@ export default class SettingsPanel extends Component {
 		const main = this;
 		const elements = this.getCurrentElements()
 		const data = this.state[tab]
-		if (tab === 'nodeData' && !data.hasOwnProperty('label')){
-			data['label'] = ''
-		}
+
+
 		return Object.keys(data).map(function(key, k) {
 			let value = data[key]
 			let renderedValue = data[key]
+			let name = key
+			let description = undefined
 
 			if (tab === 'core'){
-			
+
 			} else if (tab.endsWith('Data')){
 				if (tab.startsWith('node') && elements){
-					renderedValue = elements.nodes().data('label') || ''
-					value = elements.nodes().data('label') || ''
+					renderedValue = elements.nodes().data(key) || ''
+					value = elements.nodes().data(key) || ''
 
 				}else if (tab.startsWith('edge')){
-					if (key === 'type'){
-						renderedValue = main.makeSelect(tab, key, renderedValue, EDGE_TYPES)
-					}
+					renderedValue = elements.edges().data(key) || ''
+					value = elements.edges().data(key)
 				}
 			}else{
+				if (key === 'target-arrow-color' || key === 'source-arrow-color'){
+					return undefined
+				}
 				// Get rendered style if it exists
 				if (elements !== undefined && elements.style() !== undefined){
-					let num = ''
 					try{
-						num = elements.numericStyle(key)
+						const num = elements.numericStyle(key)
 						if (typeof num === 'number'){
 							renderedValue = num
 						}else{
@@ -147,13 +184,17 @@ export default class SettingsPanel extends Component {
 
 					}
 				}
-				// generate component if possible
-				if (key === 'target-arrow-color' || key === 'source-arrow-color'){
-					return undefined
-				}if (key === 'line-style'){
-					renderedValue = main.makeSelect(tab, key, renderedValue, LINE_STYLES)
-				}else if (key === 'shape'){
-					renderedValue = main.makeSelect(tab, key, renderedValue, NODE_SHAPES)
+			}
+			const props = SETTINGS_PROPERTIES[tab][key]
+			if (props){
+				if (props['name'])
+					name = props['name']
+				if (props['description'])
+					description = props['description']
+				if (props['options'])
+					renderedValue = main.makeSelect(tab, key, renderedValue, props['options'])
+				if (props.textInput === false){
+					value = null;
 				}
 			}
 
@@ -166,22 +207,25 @@ export default class SettingsPanel extends Component {
 			}else if (isColor(renderedValue)){
 				renderedValue = <Sketch color={renderedValue} onChange={(v) => main.handleChange(tab, key, v)}/>
 			}else if (typeof renderedValue === 'boolean'){
+				value = null;
 				renderedValue = <input
 					type='checkbox'
 					checked={renderedValue}
 					onChange={(v) => main.handleChange(tab, key, v.target.checked)}/>
 			}
 
+			let nameStyle = {'cursor': 'default'}
+			if (description)
+				nameStyle = Object.assign(nameStyle, {textDecoration: 'underline', textDecorationStyle: 'dotted'})
 			return (<tr key={k}>
-					<td>{key}</td>
-					<td><input
+					<td title={description} style={nameStyle}>{name}</td>
+					<td>{value !== null && <input
 						onChange={(v) => main.handleChange(tab, key, v.target.value)}
 						type='text'
-						value={value}/></td>
+						value={value}/>}</td>
 					<td>{renderedValue}</td>
 					<td><Button
 					  className="reset"
-						style={{padding: '3px'}}
 						onClick={() => main.handleChange(tab, key, main.DEFAULTS[tab][key])}>
 							<FA name="repeat" flip='horizontal'/>
 						</Button></td>
@@ -199,6 +243,12 @@ export default class SettingsPanel extends Component {
 			const styleTable = this.getRows('nodeStyle')
 			return (<tbody>
 				{dataTable}
+				<tr>
+					<td className='separator'></td>
+					<td className='separator'></td>
+					<td className='separator'></td>
+					<td className='separator'></td>
+				</tr>
 				{styleTable}
 			</tbody>)
 		}else if (this.state.tab === 'edge'){
@@ -206,6 +256,12 @@ export default class SettingsPanel extends Component {
 			const styleTable = this.getRows('edgeStyle')
 			return (<tbody>
 				{dataTable}
+				<tr>
+					<td className='separator'></td>
+					<td className='separator'></td>
+					<td className='separator'></td>
+					<td className='separator'></td>
+				</tr>
 				{styleTable}
 			</tbody>)
 		}
@@ -213,10 +269,10 @@ export default class SettingsPanel extends Component {
 
 	render(){
 		const main = this;
-		const rows = this.getTables() 
+		const rows = this.getTables()
 
 		const tabNames = {node: 'Nodes', edge: 'Edge', core: 'Core'}
-		
+
 		const tabs = Object.keys(tabNames).map(function(name, k){
 			return <th key={k}><Button
 					className={"SettingsPanel-tab" + (main.state.tab === name ? ' active' : '')}
@@ -241,7 +297,6 @@ export default class SettingsPanel extends Component {
 							<th style={{width: '30px'}}>
 								<Button
 									className="reset"
-									style={{padding: '3px'}}
 									onClick={() => {
 										const keys = main.state.tab === 'core' ? ['core'] : [main.state.tab + 'Data', main.state.tab + 'Style']
 										keys.forEach(tab => {

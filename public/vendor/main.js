@@ -19,6 +19,7 @@ window.defaults = {
 	core: {
 		background: '#ffffff',
 		grid: false,
+		selectionType: 'single',
 	},
 	nodeStyle: {
 		'background-color': '#999999',
@@ -39,11 +40,14 @@ window.defaults = {
 		'font-size': 12,
 		'line-style': 'solid',
 		'arrow-scale': 1,
+		'text-rotation': 'none',
 	},
 	nodeData: {
+		label: '',
 	},
 	edgeData: {
 		'type': 'directed',
+		'label': '',
 	},
 }
 
@@ -79,6 +83,7 @@ window.addEventListener("load", function() {
 		}, {
 			selector: 'edge',
 			css: {
+				'content': 'data(label)',
 				'curve-style': 'bezier',
 				'target-arrow-shape': function(node){ return node.data('type') === 'undirected' ? 'none': 'triangle' },
 				'source-arrow-shape': function(node){ return node.data('type') === 'bidirectional' ? 'triangle': 'none' }
@@ -172,7 +177,7 @@ window.addEventListener("load", function() {
 	})
 
 	cy.on('tap', function(eve){
-
+		document.activeElement.blur()
 		if (window.settings['mode'] === 'Create' && eve.target === cy){
 			const pos = eve.position;
 			const renderedPos = eve.renderedPosition;
@@ -189,20 +194,16 @@ window.addEventListener("load", function() {
 				renderedPosition: renderedPos,
 			}
 			undoRedo.do("add", newNode)
+		}else if (window.settings.mode === 'Remove'){
+			window.undoRedo.do("remove", eve.target)
 		}
 	});
 
-	cy.on("select", function(ev){
-		if (window.settings.mode === 'Remove'){
-			window.undoRedo.do("remove", ev.target)
-		}
-	})
-
-
 	document.addEventListener("keydown", function (e) {
-		if (document.activeElement.tagName !== 'body')
+		if (document.activeElement.tagName.toLowerCase() !== 'body'){
+			console.log(document.activeElement)
 			return
-		document.activeElement.blur()
+		}
 		if (e.ctrlKey || e.metaKey){
 			if (e.which === 67) // CTRL + C
 				clipboard.copy(cy.$(":selected"));
@@ -213,7 +214,6 @@ window.addEventListener("load", function() {
 					cy.elements().deselect()
 				else
 					cy.elements().select();
-				e.preventDefault();
 			}else if (e.which === 90){
 				undoRedo.undo()
 			}else if (e.which === 89){
@@ -224,18 +224,20 @@ window.addEventListener("load", function() {
 				undoRedo.do("remove", cy.elements(":selected"))
 			}
 		}
+		e.preventDefault();
 		e.stopPropagation()
 	});
 
 	cy.on('add', function(eve){
 		if (eve.target.group() === 'edges'){
+			cy.elements(":selected").unselect()
 			eve.target.style(window.defaults.edgeStyle)
 		}
 		if (eve.target.hasClass('edgehandles-ghost-node')){
 			return
 		}
 		cy.batch(function(){
-			cy.elements(":selected").unselect()
+			//cy.elements(":selected").unselect()
 			eve.target.select()
 		})
 	})

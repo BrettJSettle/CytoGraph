@@ -25,6 +25,7 @@
 .SettingsPanel-table th {
 	background: aliceblue;
 	text-decoration:bold;
+	text-align: center;
 }
 
 .SettingsPanel-table td div:first-child{
@@ -35,20 +36,32 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow:ellipsis;
+	text-align: center;
 }
 
 .SettingsPanel-table tr input, .SettingsPanel-table tr select{
 	background:none;
-	height: 100%;
+	height: auto;
 	width:100%;
+	text-align: center;
+}
+
+.SettingsPanel-table tr input[type='checkbox'] {
+	width: auto;
 }
 
 .SettingsPanel-table .reset {
-	width: 100%;
+	width: 70%;
+	padding: 0px;
 }
 
 .SettingsPanel-table tr:nth-child(even) {
 	background: #f6f6f6;
+}
+
+.SettingsPanel-table .separator {
+	padding:3px;
+	background:aliceblue;
 }
 
 .SettingsPanel-tab {
