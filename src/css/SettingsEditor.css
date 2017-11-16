@@ -46,13 +46,23 @@
 	text-align: center;
 }
 
+
 .SettingsPanel-table tr input[type='checkbox'] {
 	width: auto;
 }
 
-.SettingsPanel-table .reset {
+.SettingsPanel-table .SettingsRow-button {
 	width: 70%;
 	padding: 0px;
+}
+
+.SettingsPanel-table .SettingsRow-action {
+	overflow: initial !important;
+}
+
+.SettingsPanel-table .SettingsRow-action button{
+	vertical-align: top;
+	padding: 0px 4px !important;
 }
 
 .SettingsPanel-table tr:nth-child(even) {

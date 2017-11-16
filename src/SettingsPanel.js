@@ -12,32 +12,45 @@ const LINE_STYLES = ['solid', 'dashed', 'dotted']
 
 const EDGE_TYPES = ['directed', 'undirected', 'bidirectional']
 
-const LAYOUTS = ['grid', 'concentric', 'circle', 'random', 'breadthfirst', 'cose']
+const LAYOUTS = ['preset', 'grid', 'concentric', 'circle', 'random', 'breadthfirst', 'cose']
+
+const CORE_ACTIONS = {
+	'fit to sceen': function(){
+		window.cy.fit()
+	},
+	'make complete': function(){
+		var toAdd = []
+		for(var i = 0; i < window.cy.nodes().length; i++){
+			var el = window.cy.nodes()[i];
+			for (var j = i + 1; j < window.cy.nodes().length; j++){
+				var el2 = window.cy.nodes()[j];
+				if (el.edgesWith(el2).length == 0){
+					toAdd.push({'group': 'edges', 'data': {'source': el.id(), 'target': el2.id()}});
+				}
+			}
+		}
+		var a = window.undoRedo.do('add', toAdd);
+	},
+	'export': function(){
+		alert("This functionality is coming soon!")
+		//TODO : Export as jpg, cx?, json, anything else?
+		//export to graphspace API
+	}
+}
 
 const SETTINGS_PROPERTIES = {
 	core: {
 		grid: {
 			name: 'grid nodes',
-			textInput: false,
 		},
 		selectionType: {
 			options: ['single', 'additive'],
-			textInput: false,
+			enableInput: false,
 		},
 		layout: {
-			textInput: false,
-			options: LAYOUTS
+			options: LAYOUTS,
+			enableInput: false
 		},
-		autofocus: {
-			action: function(){
-				window.cy.fit()
-			}
-		},
-		complete: {
-			action: function(){
-				window.cy.complete()
-			}
-		}
 	},
 	edgeStyle: {
 		'text-rotation': {
@@ -46,19 +59,42 @@ const SETTINGS_PROPERTIES = {
 		'line-style': {
 			options: LINE_STYLES,
 		},
+		color: {
+			name: 'text color',
+		},
+		'background-color': {
+			name: 'line color'
+		}
 	},
 	edgeData: {
+		id: {
+			enableInput: false,
+		},
 		type: {
 			options: EDGE_TYPES,
+		},
+		source: {
+			enableInput: false,
+		},
+		target: {
+			enableInput: false,
 		}
 	},
 	nodeStyle: {
 		shape: {
 			options: NODE_SHAPES,
+		},
+		color: {
+			name: 'text color',
+		},
+		'background-color': {
+			name: 'node color'
 		}
 	},
 	nodeData: {
-
+		id: {
+			enableInput: false,
+		},
 	}
 }
 
@@ -69,15 +105,23 @@ function isColor(val){
 export default class SettingsPanel extends Component {
 	constructor(props){
 		super(props)
+		// add defaults to state, THESE VALUES CHANGE AND CAN BE INVALID
+		// window.defaults are set to renderedStyle version of state defaults
+		// DO NOT CHANGE this.DEFAULTS
 		this.state = {
 			tab: 'node',
-			...Object.assign({}, window.defaults)
+			core: Object.assign({}, window.defaults.core),
+			nodeData: Object.assign({}, window.defaults.nodeData),
+			nodeStyle: Object.assign({}, window.defaults.nodeStyle),
+			edgeData: Object.assign({}, window.defaults.edgeData),
+			edgeStyle: Object.assign({}, window.defaults.edgeStyle),
 		}
 		const DEFAULTS = {}
 		Object.keys(window.defaults).forEach(function(k){
 			DEFAULTS[k] = Object.assign({}, window.defaults[k])
 		})
 		this.DEFAULTS = DEFAULTS
+		window.p = this
 	}
 
 	componentDidMount(){
@@ -87,15 +131,24 @@ export default class SettingsPanel extends Component {
 				const eles = main.getCurrentElements()
 				if (eles === undefined)
 					return
+
 				let newNodeStyle = {}
 				Object.keys(main.state.nodeStyle).forEach(function(k){
-					newNodeStyle[k] = eles.nodes().style(k) || main.DEFAULTS['nodeStyle'][k]
+					newNodeStyle[k] = eles.nodes().style(k) || main.DEFAULTS.nodeStyle[k]
+				})
+				let newNodeData = {}
+				Object.keys(main.state.nodeData).forEach(function(k){
+					newNodeData[k] = eles.nodes().data(k) || main.DEFAULTS.nodeData[k]
 				})
 				let newEdgeStyle = {}
 				Object.keys(main.state.edgeStyle).forEach(function(k){
-					newEdgeStyle[k] = eles.edges().style(k) || main.DEFAULTS['edgeStyle'][k]
+					newEdgeStyle[k] = eles.edges().style(k) || main.DEFAULTS.edgeStyle[k]
 				})
-				main.setState({nodeStyle: newNodeStyle, edgeStyle: newEdgeStyle})
+				let newEdgeData = {}
+				Object.keys(main.state.edgeData).forEach(function(k){
+					newEdgeData[k] = eles.edges().data(k) || main.DEFAULTS.edgeData[k]
+				})
+				main.setState({nodeData: newNodeData, edgeData: newEdgeData, nodeStyle: newNodeStyle, edgeStyle: newEdgeStyle})
 			})
 		})
 	}
@@ -103,9 +156,13 @@ export default class SettingsPanel extends Component {
 	handleChange = (type, k, v) => {
 		const elementType = type.slice(0, 4)
 		const newDefaults = Object.assign({}, this.state[type])
+
 		newDefaults[k] = v
 		this.setState({[type]: newDefaults})
-		window.defaults[type][k] = v
+
+		if (window.defaults[type].hasOwnProperty(k)){
+			window.defaults[type][k] = v
+		}
 
 		if (elementType === 'core'){
 			if (k === 'background'){
@@ -116,19 +173,29 @@ export default class SettingsPanel extends Component {
 				window.cy.snapToGrid(v ? 'gridOn' : 'gridOff')
 			}else if (k === 'selectionType'){
 				window.cy._private.selectionType = v
+			}else if (k === 'layout'){
+				const layout = window.cy.layout({name: v})
+				layout.run()
 			}
 		}else if(type.endsWith('Data')){
 			const eles = this.getCurrentElements()
-			eles.data(k, v)
+			if (eles)
+				eles.data(k, v)
 		}else{
 			const eles = this.getCurrentElements()
-			eles.style(k, v)
-		}
-		if (k === 'line-color'){
-			this.handleChange('edgeStyle', 'target-arrow-color', v)
-			this.handleChange('edgeStyle', 'source-arrow-color', v)
+			if (eles){
+				eles.style(k, v)
+				v = eles.renderedStyle(k)
+				if (window.defaults[type].hasOwnProperty(k))
+					window.defaults[type][k] = v
+			}
+			if (k === 'line-color'){
+				this.handleChange('edgeStyle', 'target-arrow-color', v)
+				this.handleChange('edgeStyle', 'source-arrow-color', v)
 
+			}
 		}
+
 	}
 
 	getCurrentElements = () => {
@@ -136,19 +203,19 @@ export default class SettingsPanel extends Component {
 			return undefined;
 		}
 
-		if (this.state.tab === 'core'){
-			return undefined
-		}else if (this.state.tab === 'node'){
-			let nodes = window.cy.nodes(':selected')
-			if (nodes.length === 0)
-				nodes = window.cy.nodes()
-			return nodes
+		let eles = undefined
+		if (this.state.tab === 'node'){
+			eles = window.cy.nodes(':selected')
+			if (eles.length === 0)
+				eles = window.cy.nodes()
 		}else if (this.state.tab === 'edge'){
-			let edges = window.cy.edges(':selected')
-			if (edges.length === 0)
-				edges = window.cy.edges()
-			return edges
+			eles = window.cy.edges(':selected')
+			if (eles.length === 0)
+				eles = window.cy.edges()
 		}
+		if (eles !== undefined && eles.length === 0)
+			return undefined
+		return eles
 	}
 
 	makeSelect = (tab, key, value, options) => {
@@ -161,103 +228,199 @@ export default class SettingsPanel extends Component {
 	}
 
 	getRows(tab){
-		const main = this;
+		const main = this
 		const elements = this.getCurrentElements()
-		let data = this.state[tab]
-		
-		//TODO: add actual element data, and option to add custom rows
-		//TODO: add buttons for SETTINGS_PROPERTIES that are not "settings"
-		
-		return Object.keys(data).map(function(key, k) {
-			let value = data[key]
-			let renderedValue = data[key]
-			let name = key
-			let description = undefined
-
-			if (tab === 'core'){
-
-			} else if (tab.endsWith('Data')){
-				if (tab.startsWith('node') && elements){
-					renderedValue = elements.nodes().data(key) || ''
-					value = elements.nodes().data(key) || ''
-
-				}else if (tab.startsWith('edge')){
-					renderedValue = elements.edges().data(key) || ''
-					value = elements.edges().data(key)
-				}
-			}else{
-				if (key === 'target-arrow-color' || key === 'source-arrow-color'){
-					return undefined
-				}
-				// Get rendered style if it exists
-				if (elements !== undefined && elements.style() !== undefined){
-					try{
-						const num = elements.numericStyle(key)
-						if (typeof num === 'number'){
-							renderedValue = num
-						}else{
-							renderedValue = elements.renderedStyle(key)
-						}
-					}catch(e){
-
-					}
-				}
+		let base = Object.assign({}, window.defaults[tab])
+		if(elements){
+			if (tab.endsWith('Data')){
+				base = Object.assign(base, elements.data())
+			}else if (tab.endsWith('Style')){
+				Object.keys(base).forEach(function(k){
+					base[k] = elements.style(k)
+				})
 			}
-			const props = SETTINGS_PROPERTIES[tab][key]
-			if (props){
-				if (props['name'])
-					name = props['name']
-				if (props['description'])
-					description = props['description']
-				if (props['options'])
-					renderedValue = main.makeSelect(tab, key, renderedValue, props['options'])
-				if (props.textInput === false)
-					value = null;
-				if (props.action){
-					value = null
-					renderedValue = <button onClick={props.action}>{key}</button>
-				}
+		}
+		const remove = (k) => {
+			if (tab.endsWith('Data')){
+				delete elements.data()[k]
+			}else if (tab.endsWith('Style')){
+				elements.removeStyle(k)
+				delete window.defaults[tab][k]
+				main.setState({[tab]: window.defaults[tab]})
 			}
+		}
 
-			// change component based on value type
-			if (typeof renderedValue === 'number' || /^[0-9.]$/.test(renderedValue)){
-				renderedValue = <input
-					type='number'
-					value={renderedValue}
-					onChange={(v) => main.handleChange(tab, key, parseFloat(v.target.value))}/>
-			}else if (isColor(renderedValue)){
-				renderedValue = <Sketch color={renderedValue} onChange={(v) => main.handleChange(tab, key, v)}/>
-			}else if (typeof renderedValue === 'boolean'){
-				value = null;
-				renderedValue = <input
-					type='checkbox'
-					checked={renderedValue}
-					onChange={(v) => main.handleChange(tab, key, v.target.checked)}/>
+		const rows = Object.keys(base).map(function(key){
+			let button = undefined
+
+			const {name, description, input, renderedInput} = main.getRenderedRow(tab, key, main.state[tab][key], elements)
+			if (name === undefined){
+				return
+			}
+			if (input !== null){
+				if (main.DEFAULTS[tab].hasOwnProperty(key)){
+					button = (<Button
+						className="SettingsRow-button"
+						onClick={() => main.handleChange(tab, key, main.DEFAULTS[tab][key])}>
+						<FA name="repeat" flip='horizontal'/>
+					</Button>);
+				} else {
+					button = (<Button
+						className="SettingsRow-button"
+						onClick={() => {
+							remove(key)
+							const info = Object.assign({}, main.state[tab])
+							delete info[key]
+							main.setState({[tab]: info})
+						}}>
+							<FA name="minus"/>
+						</Button>);
+				}
 			}
 
 			let nameStyle = {'cursor': 'default'}
 			if (description)
-				nameStyle = Object.assign(nameStyle, {textDecoration: 'underline', textDecorationStyle: 'dotted'})
-			return (<tr key={k}>
-					<td title={description} style={nameStyle}>{name}</td>
-					<td>{value !== null && <input
-						onChange={(v) => main.handleChange(tab, key, v.target.value)}
-						type='text'
-						value={value}/>}</td>
-					<td>{renderedValue}</td>
+				nameStyle = Object.assign(nameStyle, {cursor: 'help', textDecoration: 'underline', textDecorationStyle: 'dotted'})
+			return (<tr key={key}>
+				<td title={description} style={nameStyle}>{name}</td>
+				{input !== null && <td>{input}</td>}
+				<td colSpan={input === null ? 2 : 1}>{renderedInput}</td>
+				<td>{button}</td>
+			</tr>)
+		})
+		if (elements !== undefined && tab.endsWith('Data')){
+			rows.push(<tr key="add">
+					<td><input id={"add-" + tab} placeholder='New Attribute'/></td>
+					<td></td>
+					<td></td>
 					<td><Button
-					  className="reset"
-						onClick={() => main.handleChange(tab, key, main.DEFAULTS[tab][key])}>
-							<FA name="repeat" flip='horizontal'/>
+						className="SettingsRow-button"
+						onClick={() => {
+							const data_name = window['add-' + tab].value
+							elements.data(data_name, 'VALUE')
+							main.setState({[tab]: main.state[tab]})
+							window['add-' + tab].value = ''
+						}}>
+							<FA name="plus"/>
 						</Button></td>
 				</tr>)
-		});
+		}else if (tab.endsWith('Style') && elements !== undefined && elements.style() !== undefined){
+			let unused_styles = Object.keys(elements.style())
+				.filter(function(n){ return !(main.state[tab].hasOwnProperty(n) || /[A-Z]/.test(n)) })
+				.sort()
+				.map(function(name, k){
+				return <option key={k} value={name}>{name}</option>
+			})
+			rows.push(<tr key="add">
+					<td colSpan="3">
+						<select id={"add-" + tab}>
+							{unused_styles}
+						</select>
+					</td>
+					<td><Button
+						className="SettingsRow-button"
+						onClick={() => {
+							const style_name = window['add-' + tab].value
+							//elements.style(style_name, elements.style(style_name))
+							window.defaults[tab][style_name] = elements.style(style_name)
+							main.handleChange(tab, style_name, elements.style(style_name))
+							window['add-' + tab].value = ''
+						}}>
+							<FA name="plus"/>
+						</Button></td>
+				</tr>)
+		}
+		return rows
 	}
 
-	getTables = () => {
+	getRenderedRow(tab, key, value, elements){
+		const main = this;
+		let renderedInput = value;
+		let input = value
+		let description = undefined
+		let name = key
+		if (elements !== undefined){
+			if (tab.endsWith('Data')){
+				let eles = window.cy.collection()
+				if (tab.startsWith('node')){
+					eles = elements.nodes()
+				}else if (tab.startsWith('edge')){
+					eles = elements.edges()
+				}
+				renderedInput = eles.data(key) || ''
+				input = renderedInput
+			}else if (elements.style() !== undefined){
+				if (key === 'target-arrow-color' || key === 'source-arrow-color'){
+					return {}
+				}
+				// Get rendered style if it exists
+				try{
+					const num = elements.numericStyle(key)
+					if (typeof num === 'number'){
+						renderedInput = num
+					}else{
+						renderedInput = elements.renderedStyle(key)
+					}
+				}catch(e){
+
+				}
+			}
+		}
+		let inputEnabled = true
+		const props = SETTINGS_PROPERTIES[tab][key]
+		if (props){
+			if (props['name'])
+				name = props['name']
+			if (props['description'])
+				description = props['description']
+			if (props.enableInput === false)
+				inputEnabled = false;
+			if (props['options'])
+				renderedInput = main.makeSelect(tab, key, renderedInput, props['options'])
+		}
+
+		if (inputEnabled){
+			input = <input
+				onChange={(v) => main.handleChange(tab, key, v.target.value)}
+				type='text'
+				value={input}/>
+
+			// change component based on value type
+			if (typeof renderedInput === 'number' || /^[0-9.]$/.test(renderedInput)){
+				renderedInput = <input
+					type='number'
+					value={renderedInput}
+					onChange={(v) => main.handleChange(tab, key, parseFloat(v.target.value))}/>
+			}else if (isColor(renderedInput)){
+				renderedInput = <Sketch color={renderedInput} onChange={(v) => main.handleChange(tab, key, v)}/>
+			}else if (typeof renderedInput === 'boolean'){
+				input = null;
+				renderedInput = <input
+					type='checkbox'
+					checked={renderedInput}
+					onChange={(v) => main.handleChange(tab, key, v.target.checked)}/>
+			}
+		}else{
+			input = null
+		}
+
+
+		return {name, description, input, renderedInput}
+	}
+
+	getTable = () => {
 		if (this.state.tab === 'core'){
+			const actions = Object.keys(CORE_ACTIONS).map(function(key){
+				return <tr key={key}>
+						<td></td>
+						<td colSpan="1" className="SettingsRow-action"><Button onClick={CORE_ACTIONS[key]}>{key}</Button></td>
+						<td></td>
+						<td></td>
+					</tr>
+			})
 			return (<tbody>
 				{this.getRows('core')}
+				{actions}
 				</tbody>)
 		}else if (this.state.tab === 'node'){
 			const dataTable = this.getRows('nodeData')
@@ -290,7 +453,7 @@ export default class SettingsPanel extends Component {
 
 	render(){
 		const main = this;
-		const rows = this.getTables()
+		const rows = this.getTable()
 
 		const tabNames = {node: 'Nodes', edge: 'Edge', core: 'Core'}
 
@@ -317,7 +480,7 @@ export default class SettingsPanel extends Component {
 							<th>Value</th>
 							<th style={{width: '30px'}}>
 								<Button
-									className="reset"
+									className="SettingsRow-button"
 									onClick={() => {
 										const keys = main.state.tab === 'core' ? ['core'] : [main.state.tab + 'Data', main.state.tab + 'Style']
 										keys.forEach(tab => {

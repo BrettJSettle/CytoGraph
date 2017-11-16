@@ -20,17 +20,20 @@ window.defaults = {
 		background: '#ffffff',
 		grid: false,
 		selectionType: 'single',
+		layout: 'preset',
 	},
 	nodeStyle: {
+		label: '',
 		'background-color': '#999999',
 		'color': '#000000',
 		'width': 30,
 		'height': 30,
 		'shape': 'ellipse',
-		'text-opacity': 1,
 		'font-size': 12,
+		'text-opacity': 1,
 	},
 	edgeStyle: {
+		label: '',
 		'line-color': '#999999',
 		'color': '#000000',
 		'target-arrow-color': '#999999',
@@ -43,11 +46,9 @@ window.defaults = {
 		'text-rotation': 'none',
 	},
 	nodeData: {
-		label: '',
 	},
 	edgeData: {
-		'type': 'directed',
-		'label': '',
+		type: 'directed',
 	},
 }
 
@@ -76,14 +77,12 @@ window.addEventListener("load", function() {
 		}, {
 			selector: 'node',
 			css: {
-				'content': 'data(label)',
 				'text-halign': 'center',
 				'text-valign': 'center',
 			}
 		}, {
 			selector: 'edge',
 			css: {
-				'content': 'data(label)',
 				'curve-style': 'bezier',
 				'target-arrow-shape': function(node){ return node.data('type') === 'undirected' ? 'none': 'triangle' },
 				'source-arrow-shape': function(node){ return node.data('type') === 'bidirectional' ? 'triangle': 'none' }
@@ -162,6 +161,17 @@ window.addEventListener("load", function() {
 			c.data(window.defaults.edgeData)
 			undoRedo.do('add', c)
 		},
+		edgeParams: function(s, t, i){
+			const ids = cy.elements('edge').map(function(edge, i) { return parseInt(edge.id().slice(0, -1), 10) }).sort(function (a, b) { return a - b })
+			const id = firstMissingNum(ids)
+			return {
+				data: {
+					source: s.id(),
+					target: t.id(),
+					id: id + 'e',
+				}
+			}
+		},
 		loopAllowed: function( node ) {
     	return true;
   	},
@@ -182,26 +192,25 @@ window.addEventListener("load", function() {
 			const pos = eve.position;
 			const renderedPos = eve.renderedPosition;
 			const ids = cy.elements('node').map(function(node, i) { return parseInt(node.id(), 10) }).sort(function (a, b) { return a - b })
-
 			const id = firstMissingNum(ids)
+			const style = window.defaults.nodeStyle
+			style['label'] = id
 			const newNode = {
 				data: {
 					id: id,
-					label: id,
 				},
-				style: window.defaults.nodeStyle,
+				style: style,
 				position: pos,
 				renderedPosition: renderedPos,
 			}
 			undoRedo.do("add", newNode)
-		}else if (window.settings.mode === 'Remove'){
+		}else if (eve.target.length && window.settings.mode === 'Remove'){
 			window.undoRedo.do("remove", eve.target)
 		}
 	});
 
 	document.addEventListener("keydown", function (e) {
 		if (document.activeElement.tagName.toLowerCase() !== 'body'){
-			console.log(document.activeElement)
 			return
 		}
 		if (e.ctrlKey || e.metaKey){
