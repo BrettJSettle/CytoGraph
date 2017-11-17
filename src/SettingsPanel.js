@@ -109,7 +109,7 @@ export default class SettingsPanel extends Component {
 		// DO NOT CHANGE this.DEFAULTS
 		this.state = {
 			tab: 'node',
-			exporting: true,
+			exporting: false,
 			core: Object.assign({}, window.defaults.core),
 			nodeData: Object.assign({}, window.defaults.nodeData),
 			nodeStyle: Object.assign({}, window.defaults.nodeStyle),
