@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build; rm -rf ../static_cytograph/*; mv build/* ../static_cytograph",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
