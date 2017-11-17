@@ -42,18 +42,19 @@ class Sketch extends React.Component {
 		const styles = reactCSS({
       'default': {
         color: {
-          //width: '36px',
-          //height: '14px',
-					fontSize: '.8em',
+					maxWidth: '10rem',
+					margin: 'auto',
+					fontSize: '.9em',
 					padding: '0px',
           borderRadius: '4px',
           background: 'white',
 					textAlign:'center',
+          border: '1px solid gray',
         },
         swatch: {
-          padding: '5px',
+          padding: '6px',
           background: this.props.color,
-          borderRadius: '1px',
+					borderRadius: '1px',
           boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
           display: 'inline-block',
           cursor: 'pointer',

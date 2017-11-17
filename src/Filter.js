@@ -12,21 +12,27 @@ export default class Filter extends Component {
 	}
 
 	componentDidMount(){
-		/*
-		const el = document.getElementsByClassName("Filter")[0]
-		el.onmouseover = (e) => {
-			if (e.buttons === 0)
-				this.setState({visible: true})
+		const main = this
+		window.addEventListener('load', function(){
+			window.searchBar.addEventListener('blur', function(){
+				main.setState({visible: false})
+			})
+		})
+	}
+
+	applyFilter(f){
+		window.cy.elements().unselect()
+		try{
+			if (f)
+				window.cy.$(f).select()
+		}catch(e){
+
 		}
-		el.onmouseleave = () => {
-			if (this.state.visible)
-				this.setState({visible: false})
-		}
-		*/
+		this.setState({filter: f})
 	}
 
 	filterChange = (a) => {
-		this.setState({filter: a.target.value})
+		this.applyFilter(a.target.value)
 	}
 
 	toggleVisible = () => {
@@ -36,6 +42,7 @@ export default class Filter extends Component {
 			if (main.state.visible){
 				const el = document.getElementById('searchBar')
 				el.focus()
+				main.applyFilter(main.state.filter)
 			}
 		}, 0)
 	}
@@ -44,14 +51,19 @@ export default class Filter extends Component {
 		const main = this;
 		const styles = {
 			filterStyle: this.state.visible ? {
-				border: "solid #ddd 1px",
 				background: "white",
+				overflow: 'hidden'
 			} : {},
 			iconStyle: {
-				padding: this.state.visible ? '5px' : '6px'
+				padding: '7px',
+				fontSize: '2rem',
+				background: this.state.visible ? 'gray': 'transparent',
+				color: this.state.visible ? 'white': 'gray'
 			},
 			searchBarStyle: {
-				display: (this.state.visible ? 'block' : 'none')
+				display: (this.state.visible ? 'block' : 'none'),
+				fontSize: '2rem',
+				height:'100%',
 			}
 		}
 		return (

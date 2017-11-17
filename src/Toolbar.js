@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import FA from 'react-fontawesome'
 import { ButtonGroup, Button, Nav, NavItem } from 'react-bootstrap';
+import Filter from './Filter.js'
 import './css/Toolbar.css'
 
 
@@ -42,6 +43,7 @@ export default class Toolbar extends Component {
 
     return (
       <div className="Toolbar">
+				<Filter />
 				<Nav className="ToolNav" bsStyle="tabs" activeKey={this.state.activeTool} onSelect={() => { }}>
           {tools}
         </Nav>

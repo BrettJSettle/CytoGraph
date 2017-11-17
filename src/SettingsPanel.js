@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import {Button} from 'react-bootstrap'
 import Sketch from './Sketch.js'
+import ExportDialog from './ExportDialog.js'
 import FA from 'react-fontawesome'
 import './css/SettingsEditor.css'
 
@@ -24,17 +25,15 @@ const CORE_ACTIONS = {
 			var el = window.cy.nodes()[i];
 			for (var j = i + 1; j < window.cy.nodes().length; j++){
 				var el2 = window.cy.nodes()[j];
-				if (el.edgesWith(el2).length == 0){
+				if (el.edgesWith(el2).length === 0){
 					toAdd.push({'group': 'edges', 'data': {'source': el.id(), 'target': el2.id()}});
 				}
 			}
 		}
-		var a = window.undoRedo.do('add', toAdd);
+		window.undoRedo.do('add', toAdd);
 	},
-	'export': function(){
-		alert("This functionality is coming soon!")
-		//TODO : Export as jpg, cx?, json, anything else?
-		//export to graphspace API
+	'export': function(main){
+		main.setState({exporting: true})
 	}
 }
 
@@ -110,6 +109,7 @@ export default class SettingsPanel extends Component {
 		// DO NOT CHANGE this.DEFAULTS
 		this.state = {
 			tab: 'node',
+			exporting: true,
 			core: Object.assign({}, window.defaults.core),
 			nodeData: Object.assign({}, window.defaults.nodeData),
 			nodeStyle: Object.assign({}, window.defaults.nodeStyle),
@@ -255,7 +255,7 @@ export default class SettingsPanel extends Component {
 
 			const {name, description, input, renderedInput} = main.getRenderedRow(tab, key, main.state[tab][key], elements)
 			if (name === undefined){
-				return
+				return undefined
 			}
 			if (input !== null){
 				if (main.DEFAULTS[tab].hasOwnProperty(key)){
@@ -409,11 +409,12 @@ export default class SettingsPanel extends Component {
 	}
 
 	getTable = () => {
+		const main = this
 		if (this.state.tab === 'core'){
 			const actions = Object.keys(CORE_ACTIONS).map(function(key){
 				return <tr key={key}>
 						<td></td>
-						<td colSpan="1" className="SettingsRow-action"><Button onClick={CORE_ACTIONS[key]}>{key}</Button></td>
+						<td colSpan="1" className="SettingsRow-action"><Button onClick={() => CORE_ACTIONS[key](main)}>{key}</Button></td>
 						<td></td>
 						<td></td>
 					</tr>
@@ -465,6 +466,14 @@ export default class SettingsPanel extends Component {
 		})
 		return (
 			<div className='SettingsPanel'>
+				{this.state.exporting &&
+					<div style={{position:'fixed', left: 0, right: 0, bottom: 0, top: 0}}>
+						<ExportDialog
+							onClose={() => {
+								main.setState({exporting: false})
+							}}/>
+					</div>
+				}
 				<table className='SettingsPanel-mode'>
 					<thead>
 						<tr>

@@ -16,6 +16,14 @@ export default class DockPanel extends Component {
 		this.DEFAULT_SIZE = .4
 	}
 
+	componentDidMount(){
+		const main = this;
+		window.addEventListener('load', function(){
+			const pxs = 370 / (main.state.position === 'left' || main.state.position === 'right' ? window.cyto.offsetWidth : window.cyto.offsetHeight)
+			main.DEFAULT_SIZE = pxs
+		})
+	}
+
   render() {
 		const main = this;
 		const glyph = this.state.size === 0 ? this.props.glyph : 'remove'
