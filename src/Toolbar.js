@@ -24,6 +24,10 @@ export default class Toolbar extends Component {
   }
 
 	handleNav(tab){
+		if (tab === 'Remove' && this.state.activeTool === 'Remove'){
+			window.cy.elements().remove()
+			return
+		}
 		let newState = {activeTool: tab}
 		this.setState(newState)
     window.settings['mode'] = tab

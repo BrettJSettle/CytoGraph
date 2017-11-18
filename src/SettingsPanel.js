@@ -11,30 +11,81 @@ const NODE_SHAPES = ['ellipse', 'triangle','rectangle','roundrectangle',
 
 const LINE_STYLES = ['solid', 'dashed', 'dotted']
 
-const EDGE_TYPES = ['directed', 'undirected', 'bidirectional']
+const EDGE_TYPES = ['undirected', 'directed', 'bidirectional']
 
 const LAYOUTS = ['preset', 'grid', 'concentric', 'circle', 'random', 'breadthfirst', 'cose']
 
 const CORE_ACTIONS = {
-	'fit to sceen': function(){
-		window.cy.fit()
+	'fit to sceen': function(main){
+		return <Button onClick={() => { window.cy.fit()} }>Fit To Screen</Button>
 	},
-	'make complete': function(){
-		var toAdd = []
-		for(var i = 0; i < window.cy.nodes().length; i++){
-			var el = window.cy.nodes()[i];
-			for (var j = i + 1; j < window.cy.nodes().length; j++){
-				var el2 = window.cy.nodes()[j];
-				if (el.edgesWith(el2).length === 0){
-					toAdd.push({'group': 'edges', 'data': {'source': el.id(), 'target': el2.id()}});
+	'make complete': function(main){
+		return <Button onClick={() => {
+			var toAdd = []
+			for(var i = 0; i < window.cy.nodes().length; i++){
+				var el = window.cy.nodes()[i];
+				for (var j = i + 1; j < window.cy.nodes().length; j++){
+					var el2 = window.cy.nodes()[j];
+					if (el.edgesWith(el2).length === 0){
+						toAdd.push({'group': 'edges', 'data': {'source': el.id(), 'target': el2.id()}});
+					}
 				}
 			}
-		}
-		window.undoRedo.do('add', toAdd);
+			window.undoRedo.do('add', toAdd);
+		}}>Make Complete</Button>
 	},
 	'export': function(main){
-		main.setState({exporting: true})
+		return <div>
+			<Button onClick={() => {
+					main.setState({exporting: true})
+			}}>Export Network</Button>
+			<Button onClick={() => {
+				var data = window.cy.style()
+				data = "data:text/json;charset=utf-8," + encodeURIComponent(data);
+
+				var elem = document.createElement('a');
+				elem.setAttribute("href",data);
+				elem.setAttribute("download", "style.json");
+				elem.click();
+
+			}}>Export Style</Button>
+		</div>
+	},
+	'import': function(main){
+		return <div>
+			<Button onClick={() => {
+				importFile(function(v) {
+					console.log(v)
+					const network = JSON.parse(v)
+					window.loadJSON(network)
+				})
+			}}>Import Network</Button>
+			<Button onClick ={() => {
+				importFile(function(v) {
+					const network = JSON.parse(v)
+					if (network instanceof Array)
+						window.loadJSON(network[0])
+					else
+						window.loadJSON(network)
+				})
+			}}>Import Style</Button>
+		</div>
 	}
+}
+
+const importFile = (func) => {
+		const inp = document.createElement('input')
+		inp.setAttribute('type', 'file')
+		inp.setAttribute('name', 'network')
+		inp.click()
+		inp.addEventListener('change', function(eve){
+			const net = eve.target.files[0]
+			const reader = new FileReader()
+			reader.onload = function(v) {
+				func(reader.result)
+			}
+			reader.readAsText(net)
+		})
 }
 
 const SETTINGS_PROPERTIES = {
@@ -179,8 +230,13 @@ export default class SettingsPanel extends Component {
 			}
 		}else if(type.endsWith('Data')){
 			const eles = this.getCurrentElements()
-			if (eles)
+			if (eles){
+				if (type.startsWith('edge') && k === 'type'){
+					this.handleChange('edgeStyle', 'target-arrow-shape', v === 'undirected' ? 'none': 'triangle' )
+					this.handleChange('edgeStyle', 'source-arrow-shape', v === 'bidirectional' ? 'triangle': 'none' )
+				}
 				eles.data(k, v)
+			}
 		}else{
 			const eles = this.getCurrentElements()
 			if (eles){
@@ -192,7 +248,6 @@ export default class SettingsPanel extends Component {
 			if (k === 'line-color'){
 				this.handleChange('edgeStyle', 'target-arrow-color', v)
 				this.handleChange('edgeStyle', 'source-arrow-color', v)
-
 			}
 		}
 
@@ -213,7 +268,9 @@ export default class SettingsPanel extends Component {
 			if (eles.length === 0)
 				eles = window.cy.edges()
 		}
-		if (eles !== undefined && eles.length === 0)
+		if (eles !== undefined)
+			eles = eles.filter(function(e) { return !e.hasClass('edgehandles-ghost'); })
+		if (eles === undefined || eles.length === 0)
 			return undefined
 		return eles
 	}
@@ -339,6 +396,11 @@ export default class SettingsPanel extends Component {
 		let input = value
 		let description = undefined
 		let name = key
+
+		if (key === 'target-arrow-color' || key === 'source-arrow-color' || key === 'target-arrow-shape' || key === 'source-arrow-shape'){
+			return {}
+		}
+
 		if (elements !== undefined){
 			if (tab.endsWith('Data')){
 				let eles = window.cy.collection()
@@ -350,9 +412,6 @@ export default class SettingsPanel extends Component {
 				renderedInput = eles.data(key) || ''
 				input = renderedInput
 			}else if (elements.style() !== undefined){
-				if (key === 'target-arrow-color' || key === 'source-arrow-color'){
-					return {}
-				}
 				// Get rendered style if it exists
 				try{
 					const num = elements.numericStyle(key)
@@ -413,10 +472,7 @@ export default class SettingsPanel extends Component {
 		if (this.state.tab === 'core'){
 			const actions = Object.keys(CORE_ACTIONS).map(function(key){
 				return <tr key={key}>
-						<td></td>
-						<td colSpan="1" className="SettingsRow-action"><Button onClick={() => CORE_ACTIONS[key](main)}>{key}</Button></td>
-						<td></td>
-						<td></td>
+						<td colSpan="4" className="SettingsRow-action">{CORE_ACTIONS[key](main)}</td>
 					</tr>
 			})
 			return (<tbody>

@@ -9,8 +9,6 @@ export default class ModalDialog extends React.Component{
     this.fadeIn = this.fadeIn.bind(this)
     this.fadeOut = this.fadeOut.bind(this)
 
-		console.log(props)
-
     let opacity = 0,
       display = 'block',
       visibility = 'hidden'

@@ -23,8 +23,10 @@ export default class Filter extends Component {
 	applyFilter(f){
 		window.cy.elements().unselect()
 		try{
-			if (f)
-				window.cy.$(f).select()
+			setTimeout(function(){
+				if (f)
+					window.cy.$(f).select()
+			}, 100)
 		}catch(e){
 
 		}

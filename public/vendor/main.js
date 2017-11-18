@@ -38,6 +38,8 @@ window.defaults = {
 		'color': '#000000',
 		'target-arrow-color': '#999999',
 		'source-arrow-color': '#999999',
+		'source-arrow-shape': 'none',
+		'target-arrow-shape': 'none',
 		'width': 5,
 		'text-opacity': 1,
 		'font-size': 12,
@@ -48,19 +50,10 @@ window.defaults = {
 	nodeData: {
 	},
 	edgeData: {
-		type: 'directed',
+		type: 'undirected',
 	},
 }
-
-
-window.addEventListener("load", function() {
-	var cy = window.cy = cytoscape({
-		container: document.getElementById('cyto'),
-		ready: function() {},
-		layout: {
-			name: 'preset',
-		},
-		style: [{
+const DEFAULT_STYLES = [{
 			selector: ':selected',
 			css: {
 				'overlay-padding': 3,
@@ -77,6 +70,7 @@ window.addEventListener("load", function() {
 		}, {
 			selector: 'node',
 			css: {
+				'label': 'data(id)',
 				'text-halign': 'center',
 				'text-valign': 'center',
 			}
@@ -84,15 +78,16 @@ window.addEventListener("load", function() {
 			selector: 'edge',
 			css: {
 				'curve-style': 'bezier',
-				'target-arrow-shape': function(node){ return node.data('type') === 'undirected' ? 'none': 'triangle' },
-				'source-arrow-shape': function(node){ return node.data('type') === 'bidirectional' ? 'triangle': 'none' }
-			}
+				/*'target-arrow-shape': //function(node){ return node.data('type') === 'undirected' ? 'none': 'triangle' },
+				'source-arrow-shape': //function(node){ return node.data('type') === 'bidirectional' ? 'triangle': 'none' }
+				*/
+			},
 		},
 		// some style for the ext
 		{
 			selector: '.edgehandles-hover',
 			css: {
-				//'background-color': 'red'
+
 			}
 		},
 		{
@@ -118,7 +113,16 @@ window.addEventListener("load", function() {
 				'target-arrow-color': 'red',
 				'source-arrow-color': 'red'
 			}
-		}],
+		}]
+
+window.addEventListener("load", function() {
+	var cy = window.cy = cytoscape({
+		container: document.getElementById('cyto'),
+		ready: function() {},
+		layout: {
+			name: 'preset',
+		},
+		style: DEFAULT_STYLES,
 		elements: {
 			nodes: [],
 			edges: []
@@ -131,6 +135,33 @@ window.addEventListener("load", function() {
 		undoableDrag: true, // Whether dragging nodes are undoable can be a function as well
 	}
 	const undoRedo = window.undoRedo = cy.undoRedo(options); // Can also be set whenever wanted.
+
+	function loadElements(elements){
+		window.cy.startBatch()
+		window.cy.elements().remove()
+		window.cy.add(elements)
+		window.cy.fit()
+		window.cy.endBatch()
+	}
+
+	function loadStyle(style){
+		window.cy.startBatch()
+		window.cy.style(style)
+		DEFAULT_STYLES.forEach(function(st){
+			window.cy.style().selector(st.selector).css(st.css)
+		})
+		window.cy.endBatch()
+	}
+
+	window.loadJSON = (json) => {
+		if (json.hasOwnProperty('elements') && json.hasOwnProperty('style')){
+			window.cy.json(json)
+		}else if (json.hasOwnProperty('elements')){
+			loadElements(json['elements'])
+		}else if (json.hasOwnProperty('style')){
+			loadStyle(json['style'])
+		}
+	}
 
 	function deleteEles(eles){
 		return eles.remove();
