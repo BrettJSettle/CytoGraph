@@ -1,0 +1,36 @@
+.graphspace-export-wrapper {
+}
+.graphspace-export-wrapper .modal-wrapper {
+	background: rgba(0, 0, 0, .25);
+	position:fixed;
+	top:0;
+	bottom:0;
+	left: 0;
+	right:0;
+}
+
+.graphspace-login {
+	border-radius: 10px 10px 0 0;
+	padding: 5px;
+	border: 2px solid gray;
+}
+.graphspace-login input {
+	font-size: 1em;
+	border: 2px solid transparent;
+	border-bottom: 1px solid gray;
+	padding: 1px;
+	width: 70%;
+}
+
+.graphspace-browser {
+	border-radius: 0 0 10px 10px;
+	padding: 5px;
+	border: 2px solid gray;
+	border-top:0;
+}
+
+.graphspace-toggle {
+	width: max-content;
+	margin:auto;
+}
+

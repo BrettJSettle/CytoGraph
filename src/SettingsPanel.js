@@ -1,8 +1,11 @@
 import React, {Component} from 'react'
+import ReactDOM from 'react-dom'
 import {Button} from 'react-bootstrap'
 import Sketch from './Sketch.js'
-import ExportDialog from './ExportDialog.js'
+import ModalDialog from './ModalDialog.js'
 import FA from 'react-fontawesome'
+import GraphSpaceDialog from './GraphSpaceDialog.js'
+import './css/GraphSpace.css'
 import './css/SettingsEditor.css'
 
 const NODE_SHAPES = ['ellipse', 'triangle','rectangle','roundrectangle',
@@ -36,10 +39,18 @@ const CORE_ACTIONS = {
 	},
 	'export': function(main){
 		return <div>
-			<Button onClick={() => {
-					main.setState({exporting: true})
-			}}>Export Network</Button>
-			<Button onClick={() => {
+			Export as
+			<Button onClick={function(){
+				const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.cy.json()))
+				exportFile(data, "network.json")
+			}}>CyJS</Button>
+			<Button onClick={function(){
+				exportFile(window.cy.jpg(), "network.jpg")
+			}}>JPG</Button>
+			<Button onClick={function(){
+				exportFile(window.cy.png(), "network.jpg")
+			}}>PNG</Button>
+			<Button onClick={function(){
 				var data = window.cy.style()
 				data = "data:text/json;charset=utf-8," + encodeURIComponent(data);
 
@@ -48,18 +59,19 @@ const CORE_ACTIONS = {
 				elem.setAttribute("download", "style.json");
 				elem.click();
 
-			}}>Export Style</Button>
+			}}>Style</Button>
 		</div>
 	},
 	'import': function(main){
 		return <div>
+			Import
 			<Button onClick={() => {
 				importFile(function(v) {
 					console.log(v)
 					const network = JSON.parse(v)
 					window.loadJSON(network)
 				})
-			}}>Import Network</Button>
+			}}>Network</Button>
 			<Button onClick ={() => {
 				importFile(function(v) {
 					const network = JSON.parse(v)
@@ -68,24 +80,55 @@ const CORE_ACTIONS = {
 					else
 						window.loadJSON(network)
 				})
-			}}>Import Style</Button>
+			}}>Style</Button>
+		</div>
+	},
+	'graphspace': function(main){
+		return <div>
+			<Button onClick={() => {
+				openGraphSpace()
+			}}>GraphSpace</Button>
 		</div>
 	}
 }
 
+
+const openGraphSpace = () => {
+	const modalWindow = document.createElement('div')
+	modalWindow.setAttribute('class', 'graphspace-export-wrapper')
+	const modal = <GraphSpaceDialog
+		onClose={() => {
+			window.$('.SettingsDock')[0].style.display = 'block'
+			window.$('.ScriptDock')[0].style.display = 'block'
+			modalWindow.remove()
+		}}/>
+
+	window.$('.SettingsDock')[0].style.display = 'none'
+	window.$('.ScriptDock')[0].style.display = 'none'
+
+	document.body.append(modalWindow)
+	ReactDOM.render(modal, modalWindow);
+}
+
 const importFile = (func) => {
-		const inp = document.createElement('input')
-		inp.setAttribute('type', 'file')
-		inp.setAttribute('name', 'network')
-		inp.click()
-		inp.addEventListener('change', function(eve){
-			const net = eve.target.files[0]
-			const reader = new FileReader()
-			reader.onload = function(v) {
-				func(reader.result)
-			}
-			reader.readAsText(net)
-		})
+	const inp = document.createElement('input')
+	inp.setAttribute('type', 'file')
+	inp.setAttribute('name', 'network')
+	inp.click()
+	inp.addEventListener('change', function(eve){
+		const net = eve.target.files[0]
+		const reader = new FileReader()
+		reader.onload = function(v) {
+			func(reader.result)
+		}
+		reader.readAsText(net)
+	})
+}
+const	exportFile = (data, name) => {
+	var elem = document.createElement('a');
+	elem.setAttribute("href",data);
+	elem.setAttribute("download", name);
+	elem.click();
 }
 
 const SETTINGS_PROPERTIES = {
@@ -160,7 +203,6 @@ export default class SettingsPanel extends Component {
 		// DO NOT CHANGE this.DEFAULTS
 		this.state = {
 			tab: 'node',
-			exporting: false,
 			core: Object.assign({}, window.defaults.core),
 			nodeData: Object.assign({}, window.defaults.nodeData),
 			nodeStyle: Object.assign({}, window.defaults.nodeStyle),
@@ -359,7 +401,8 @@ export default class SettingsPanel extends Component {
 							window['add-' + tab].value = ''
 						}}>
 							<FA name="plus"/>
-						</Button></td>
+						</Button>
+					</td>
 				</tr>)
 		}else if (tab.endsWith('Style') && elements !== undefined && elements.style() !== undefined){
 			let unused_styles = Object.keys(elements.style())
@@ -378,13 +421,13 @@ export default class SettingsPanel extends Component {
 						className="SettingsRow-button"
 						onClick={() => {
 							const style_name = window['add-' + tab].value
-							//elements.style(style_name, elements.style(style_name))
 							window.defaults[tab][style_name] = elements.style(style_name)
 							main.handleChange(tab, style_name, elements.style(style_name))
 							window['add-' + tab].value = ''
 						}}>
 							<FA name="plus"/>
-						</Button></td>
+						</Button>
+					</td>
 				</tr>)
 		}
 		return rows
@@ -463,7 +506,6 @@ export default class SettingsPanel extends Component {
 			input = null
 		}
 
-
 		return {name, description, input, renderedInput}
 	}
 
@@ -477,6 +519,9 @@ export default class SettingsPanel extends Component {
 			})
 			return (<tbody>
 				{this.getRows('core')}
+				<tr>
+					<td className="separator" colSpan="4"></td>
+				</tr>
 				{actions}
 				</tbody>)
 		}else if (this.state.tab === 'node'){
@@ -485,10 +530,7 @@ export default class SettingsPanel extends Component {
 			return (<tbody>
 				{dataTable}
 				<tr>
-					<td className='separator'></td>
-					<td className='separator'></td>
-					<td className='separator'></td>
-					<td className='separator'></td>
+					<td className='separator' colSpan='4'></td>
 				</tr>
 				{styleTable}
 			</tbody>)
@@ -498,10 +540,7 @@ export default class SettingsPanel extends Component {
 			return (<tbody>
 				{dataTable}
 				<tr>
-					<td className='separator'></td>
-					<td className='separator'></td>
-					<td className='separator'></td>
-					<td className='separator'></td>
+					<td className='separator' colSpan="4"></td>
 				</tr>
 				{styleTable}
 			</tbody>)
@@ -522,14 +561,6 @@ export default class SettingsPanel extends Component {
 		})
 		return (
 			<div className='SettingsPanel'>
-				{this.state.exporting &&
-					<div style={{position:'fixed', left: 0, right: 0, bottom: 0, top: 0}}>
-						<ExportDialog
-							onClose={() => {
-								main.setState({exporting: false})
-							}}/>
-					</div>
-				}
 				<table className='SettingsPanel-mode'>
 					<thead>
 						<tr>
