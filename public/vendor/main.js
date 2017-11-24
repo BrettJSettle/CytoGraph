@@ -12,7 +12,7 @@ function firstMissingNum(source, min = 0, max = source.length){
 }
 
 window.settings = {
-	mode: 'Create',
+	mode: 'Node',
 }
 
 window.defaults = {
@@ -53,7 +53,7 @@ window.defaults = {
 		type: 'undirected',
 	},
 }
-const DEFAULT_STYLES = [{
+window.DEFAULT_STYLES = [{
 			selector: ':selected',
 			css: {
 				'overlay-padding': 3,
@@ -122,7 +122,7 @@ window.addEventListener("load", function() {
 		layout: {
 			name: 'preset',
 		},
-		style: DEFAULT_STYLES,
+		style: window.DEFAULT_STYLES,
 		elements: {
 			nodes: [],
 			edges: []
@@ -147,7 +147,7 @@ window.addEventListener("load", function() {
 	function loadStyle(style){
 		window.cy.startBatch()
 		window.cy.style(style)
-		DEFAULT_STYLES.forEach(function(st){
+		window.DEFAULT_STYLES.forEach(function(st){
 			window.cy.style().selector(st.selector).css(st.css)
 		})
 		window.cy.endBatch()
@@ -177,13 +177,13 @@ window.addEventListener("load", function() {
 	})
 
 	const edgehandleDefaults = {
-		handleSize: 10, // the size of the edge handle put on nodes 
+		handleSize: 20, // the size of the edge handle put on nodes 
 		handleHitThreshold: 6, // a threshold for hit detection that makes it easier to grab the handle 
-		handleColor: '#ff0000', // the colour of the handle and the line drawn from it 
+		handleColor: 'rgba(250, 0, 0, .50)', // the colour of the handle and the line drawn from it 
 		handleOutlineColor: '#FFFFFF', // the colour of the handle outline 
 		handleOutlineWidth: 0, // the width of the handle outline in pixels 
-		handleNodes: 'node', // selector/filter function for whether edges can be made from a given node 
-		handlePosition: 'middle top', // position of the handle in the format of "X-AXIS Y-AXIS"
+		handleNodes: function(n) { return window.settings['mode'] === 'Edge' }, // selector/filter function for whether edges can be made from a given node 
+		handlePosition: 'middle middle', // position of the handle in the format of "X-AXIS Y-AXIS"
 		cxt: false, // whether cxt events trigger edgehandles (useful on touch) 
 		toggleOffOnLeave: true, //edge is toggled by leaving a node (true)
 		nodeLoopOffset: -50, // offset for edgeType: 'node' loops 
@@ -219,7 +219,7 @@ window.addEventListener("load", function() {
 
 	cy.on('tap', function(eve){
 		document.activeElement.blur()
-		if (window.settings['mode'] === 'Create' && eve.target === cy){
+		if (window.settings['mode'] === 'Node' && eve.target === cy){
 			const pos = eve.position;
 			const renderedPos = eve.renderedPosition;
 			const ids = cy.elements('node').map(function(node, i) { return parseInt(node.id(), 10) }).sort(function (a, b) { return a - b })

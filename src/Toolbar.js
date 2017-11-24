@@ -10,11 +10,12 @@ export default class Toolbar extends Component {
     super(props);
     this.state = {
       isVisible: true,
-			activeTool: 'Create',
+			activeTool: 'Node',
 		};
 		this.tools = [
       {title: 'Mouse', icon: <FA name="mouse-pointer"/>},
-			{title: 'Create', icon: <FA name="plus-circle"/>},
+			{title: 'Node', icon: <FA name="plus-circle"/>},
+			{title: 'Edge', icon: <FA name="mars"/>},
 			{title: 'Remove', icon: <FA name="minus-circle"/>}
 		]
     this.actions = [
@@ -31,7 +32,7 @@ export default class Toolbar extends Component {
 		let newState = {activeTool: tab}
 		this.setState(newState)
     window.settings['mode'] = tab
-		window.cy.edgehandles(tab === 'Create' ? 'enable' : 'disable')
+		window.cy.edgehandles(tab === 'Edge' ? 'enable' : 'disable')
 	}
 
   render() {

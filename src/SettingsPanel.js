@@ -51,8 +51,8 @@ const CORE_ACTIONS = {
 				exportFile(window.cy.png(), "network.jpg")
 			}}>PNG</Button>
 			<Button onClick={function(){
-				var data = window.cy.style()
-				data = "data:text/json;charset=utf-8," + encodeURIComponent(data);
+				var data = window.cy.style().json()
+				data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
 
 				var elem = document.createElement('a');
 				elem.setAttribute("href",data);
@@ -89,6 +89,11 @@ const CORE_ACTIONS = {
 				openGraphSpace()
 			}}>GraphSpace</Button>
 		</div>
+	},
+	'reset': function(main){
+		return <Button onClick={() => {
+			window.cy.style(window.DEFAULT_STYLES)
+		}}>Reset Style</Button>
 	}
 }
 
