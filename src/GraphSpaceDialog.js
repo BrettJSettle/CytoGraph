@@ -17,10 +17,6 @@ export default class GraphSpaceDialog extends Component {
 		}
 	}
 
-	componentDidMount(){
-		this.get_graph_list('bsettle@ucsd.edu', 'cytograph')
-	}
-
 	get_graph_list(email, password){
 		this.setState({email: email,
 			password: password,
