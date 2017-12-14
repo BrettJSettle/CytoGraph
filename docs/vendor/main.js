@@ -195,6 +195,9 @@ window.addEventListener("load", function() {
 		edgeParams: function(s, t, i){
 			const ids = cy.elements('edge').map(function(edge, i) { return parseInt(edge.id().slice(0, -1), 10) }).sort(function (a, b) { return a - b })
 			const id = firstMissingNum(ids)
+			while(cy.elements('edge[id="' + id + 'e"]').length > 0){
+				id += 1;
+			}
 			return {
 				data: {
 					source: s.id(),
