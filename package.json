@@ -18,8 +18,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-		"ghpages": "react-scripts build && mv build/* docs",
-    "build": "react-scripts build; rm -rf ../static_cytograph/*; mv build/* ../static_cytograph",
+    "gh": "react-scripts build && mv build/* docs",
+    "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
