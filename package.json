@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "gh": "react-scripts build && rm -rf docs && mv -f build docs",
+    "gh": "PUBLIC_URL='/cytograph' react-scripts build && rm -rf docs && mv -f build docs",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
